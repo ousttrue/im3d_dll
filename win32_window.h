@@ -14,4 +14,5 @@ public:
     std::tuple<int, int> GetSize() const;
     bool HasFocus() const;
     std::tuple<int, int> GetCursorPosition() const;
+    void Win32Window::UpdateImGui();
 };

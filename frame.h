@@ -1,8 +1,4 @@
 #pragma once
 
-namespace Im3d
-{
-    struct Example;
-}
-
-void Frame(Im3d::Example &example);
+class Scene;
+void Frame(Scene &scene);

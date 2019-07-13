@@ -2,10 +2,43 @@
 #include <imgui/imgui.h>
 #include <im3d.h>
 #include <im3d_math.h>
-#include "im3d_example.h"
+#include "scene.h"
 
-void Frame(Im3d::Example &example)
+void RandSeed(int _seed)
 {
+    srand(_seed);
+}
+int RandInt(int _min, int _max)
+{
+    return _min + (int)rand() % (_max - _min);
+}
+float RandFloat(float _min, float _max)
+{
+    return _min + (float)rand() / (float)RAND_MAX * (_max - _min);
+}
+Im3d::Vec3 RandVec3(float _min, float _max)
+{
+    return Im3d::Vec3(
+        RandFloat(_min, _max),
+        RandFloat(_min, _max),
+        RandFloat(_min, _max));
+}
+
+Im3d::Mat3 RandRotation()
+{
+    return Im3d::Rotation(Im3d::Normalize(RandVec3(-1.0f, 1.0f)), RandFloat(-Im3d::Pi, Im3d::Pi));
+}
+
+Im3d::Color RandColor(float _min, float _max)
+{
+    Im3d::Vec3 v = RandVec3(_min, _max);
+    return Im3d::Color(v.x, v.y, v.z);
+}
+
+void Frame(Scene &scene)
+{
+    RandSeed(0);
+
     Im3d::Context &ctx = Im3d::GetContext();
     Im3d::AppData &ad = Im3d::GetAppData();
 
@@ -72,7 +105,7 @@ void Frame(Im3d::Example &example)
 
         // Using the transform for drawing *after* the call to Gizmo() causes a 1 frame lag between the gizmo position and the output
         // matrix - this can only be avoided if it's possible to issue the draw call *before* calling Gizmo().
-        Im3d::DrawTeapot(transform, example.m_camViewProj);
+        scene.DrawTeapot(transform);
 
         ImGui::TreePop();
     }
@@ -126,7 +159,7 @@ void Frame(Im3d::Example &example)
             break;
         };
 
-        Im3d::DrawTeapot(Im3d::Mat4(translation, rotation, scale), example.m_camViewProj);
+        scene.DrawTeapot(Im3d::Mat4(translation, rotation, scale).m);
 
         Im3d::PopMatrix();
 
@@ -148,8 +181,8 @@ void Frame(Im3d::Example &example)
             child = Im3d::Inverse(parent) * parentChild; // extract the child transform if modified
         }
 
-        Im3d::DrawTeapot(parent, example.m_camViewProj);
-        Im3d::DrawTeapot(parent * child, example.m_camViewProj);
+        scene.DrawTeapot(parent);
+        scene.DrawTeapot(parent * child);
 
         ImGui::TreePop();
     }
@@ -173,7 +206,7 @@ void Frame(Im3d::Example &example)
 
         static Im3d::Mat4 transform(1.0f);
         Im3d::Gizmo("GizmoAppearance", transform);
-        Im3d::DrawTeapot(transform, example.m_camViewProj);
+        scene.DrawTeapot(transform);
 
         Im3d::GetContext().m_gizmoHeightPixels = storedHeight;
         Im3d::GetContext().m_gizmoSizePixels = storedSize;
@@ -390,9 +423,9 @@ void Frame(Im3d::Example &example)
             for (int i = 0; i < primCount; ++i)
             {
                 Im3d::Mat4 wm(1.0f);
-                wm.setTranslation(Im3d::RandVec3(-10.0f, 10.0f));
+                wm.setTranslation(RandVec3(-10.0f, 10.0f));
                 Im3d::SetMatrix(wm);
-                Im3d::Vertex(Im3d::Vec3(0.0f), Im3d::RandFloat(2.0f, 16.0f), Im3d::RandColor(0.0f, 1.0f));
+                Im3d::Vertex(Im3d::Vec3(0.0f), RandFloat(2.0f, 16.0f), RandColor(0.0f, 1.0f));
             }
             Im3d::PopMatrix();
         }
@@ -400,8 +433,8 @@ void Frame(Im3d::Example &example)
         {
             for (int i = 0; i < primCount; ++i)
             {
-                Im3d::Vec3 t = Im3d::RandVec3(-10.0f, 10.0f);
-                Im3d::Vertex(t, Im3d::RandFloat(2.0f, 16.0f), Im3d::RandColor(0.0f, 1.0f));
+                Im3d::Vec3 t = RandVec3(-10.0f, 10.0f);
+                Im3d::Vertex(t, RandFloat(2.0f, 16.0f), RandColor(0.0f, 1.0f));
             }
         }
         Im3d::End();
@@ -426,8 +459,8 @@ void Frame(Im3d::Example &example)
         {
             Im3d::PushMatrix();
             Im3d::Mat4 wm(1.0f);
-            wm.setRotation(Im3d::Rotation(Im3d::Normalize(Im3d::RandVec3(-1.0f, 1.0f)), Im3d::RandFloat(0.0f, 6.0f)));
-            wm.setTranslation(Im3d::RandVec3(-10.0f, 10.0f));
+            wm.setRotation(Im3d::Rotation(Im3d::Normalize(RandVec3(-1.0f, 1.0f)), RandFloat(0.0f, 6.0f)));
+            wm.setTranslation(RandVec3(-10.0f, 10.0f));
             Im3d::MulMatrix(wm);
             Im3d::BeginTriangles();
             Im3d::Vertex(-1.0f, 0.0f, -1.0f, Im3d::Color_Red);
@@ -443,8 +476,8 @@ void Frame(Im3d::Example &example)
         {
             Im3d::PushMatrix();
             Im3d::Mat4 wm(1.0f);
-            wm.setRotation(Im3d::Rotation(Im3d::Normalize(Im3d::RandVec3(-1.0f, 1.0f)), Im3d::RandFloat(0.0f, 6.0f)));
-            wm.setTranslation(Im3d::RandVec3(-10.0f, 10.0f));
+            wm.setRotation(Im3d::Rotation(Im3d::Normalize(RandVec3(-1.0f, 1.0f)), RandFloat(0.0f, 6.0f)));
+            wm.setTranslation(RandVec3(-10.0f, 10.0f));
             Im3d::MulMatrix(wm);
             Im3d::BeginLineLoop();
             Im3d::Vertex(-1.0f, 0.0f, -1.0f, Im3d::Color_Magenta);
@@ -460,10 +493,10 @@ void Frame(Im3d::Example &example)
         {
             Im3d::PushMatrix();
             Im3d::Mat4 wm(1.0f);
-            wm.setTranslation(Im3d::RandVec3(-10.0f, 10.0f));
+            wm.setTranslation(RandVec3(-10.0f, 10.0f));
             Im3d::MulMatrix(wm);
             Im3d::BeginPoints();
-            Im3d::Vertex(-1.0f, 0.0f, -1.0f, Im3d::RandColor(0.0f, 1.0f));
+            Im3d::Vertex(-1.0f, 0.0f, -1.0f, RandColor(0.0f, 1.0f));
             Im3d::End();
             Im3d::PopMatrix();
         }
@@ -528,7 +561,7 @@ void Frame(Im3d::Example &example)
 
     if (ImGui::TreeNode("Camera"))
     {
-        ImGui::Checkbox("Ortho", &example.m_camOrtho);
+        ImGui::Checkbox("Ortho", &scene.m_camOrtho);
 
         ImGui::TreePop();
     }

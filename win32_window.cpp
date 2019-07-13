@@ -64,10 +64,16 @@ class Impl
     HWND m_hwnd = NULL;
     int m_width = 0;
     int m_height = 0;
+    LARGE_INTEGER g_SysTimerFreq;
+    LARGE_INTEGER m_currTime = {0};
+    LARGE_INTEGER m_prevTime = {0};
+    float m_deltaTime = 0;
 
 public:
     Impl()
     {
+        QueryPerformanceFrequency(&g_SysTimerFreq);
+        QueryPerformanceCounter(&m_currTime);
     }
     ~Impl()
     {
@@ -92,6 +98,14 @@ public:
     std::tuple<int, int> GetSize() const
     {
         return std::make_tuple(m_width, m_height);
+    }
+    float UpdateTime()
+    {
+        m_prevTime = m_currTime;
+        QueryPerformanceCounter(&m_currTime);
+        double microseconds = (double)((m_currTime.QuadPart - m_prevTime.QuadPart) * 1000000ll / g_SysTimerFreq.QuadPart);
+        m_deltaTime = (float)(microseconds / 1000000.0);
+        return m_deltaTime;
     }
 };
 Impl *g_impl = nullptr;
@@ -198,7 +212,7 @@ static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARA
 }
 
 Win32Window::Win32Window()
-: m_impl(new Impl)
+    : m_impl(new Impl)
 {
     g_impl = m_impl;
 }
@@ -233,4 +247,35 @@ std::tuple<int, int> Win32Window::GetCursorPosition() const
     GetCursorPos(&p);
     ScreenToClient(m_impl->GetHandle(), &p);
     return std::make_tuple(p.x, p.y);
+}
+
+void Win32Window::UpdateImGui()
+{
+    ImGuiIO &io = ImGui::GetIO();
+    io.KeyMap[ImGuiKey_Tab] = VK_TAB;
+    io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
+    io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
+    io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
+    io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
+    io.KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
+    io.KeyMap[ImGuiKey_PageDown] = VK_NEXT;
+    io.KeyMap[ImGuiKey_Home] = VK_HOME;
+    io.KeyMap[ImGuiKey_End] = VK_END;
+    io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
+    io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
+    io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
+    io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
+    io.KeyMap[ImGuiKey_A] = 0x41;
+    io.KeyMap[ImGuiKey_C] = 0x43;
+    io.KeyMap[ImGuiKey_V] = 0x56;
+    io.KeyMap[ImGuiKey_X] = 0x58;
+    io.KeyMap[ImGuiKey_Y] = 0x59;
+    io.KeyMap[ImGuiKey_Z] = 0x5A;
+
+    io.ImeWindowHandle = m_impl->GetHandle();
+    int w, h;
+    std::tie(w, h) = m_impl->GetSize();
+    io.DisplaySize = ImVec2((float)w, (float)h);
+    io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+    io.DeltaTime = m_impl->UpdateTime();
 }
