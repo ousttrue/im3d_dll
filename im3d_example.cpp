@@ -1221,23 +1221,23 @@ bool Example::init(int _width, int _height, const char* _title)
 	m_height = _height;
 	m_title  = _title;
 	if (!InitWindow(m_width, m_height, m_title)) {
-		goto Example_init_fail;
+		return false;
 	}
 	#if defined(IM3D_OPENGL) 
 		if (!InitOpenGL(IM3D_OPENGL_VMAJ, IM3D_OPENGL_VMIN)) {
-			goto Example_init_fail;
+			return false;
 		}
 	#elif defined(IM3D_DX11)
 		if (!InitDx11()) {
-			goto Example_init_fail;
+			return false;
 		}
 	#endif
 
 	if (!ImGui_Init()) {
-		goto Example_init_fail;
+		return false;
 	}	
 	if (!Im3d_Init()) {	
-		goto Example_init_fail;
+		return false;
 	}
 
 	m_camOrtho = false;
@@ -1246,13 +1246,9 @@ bool Example::init(int _width, int _height, const char* _title)
 	m_camFovDeg = 50.0f;
 	
 	return true;
-
-Example_init_fail:
-	shutdown();
-	return false;
 }
 
-void Example::shutdown()
+Example::~Example()
 {
 	ImGui_Shutdown();
 	Im3d_Shutdown();
