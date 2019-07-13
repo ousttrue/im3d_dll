@@ -1,26 +1,9 @@
 #pragma once
-#ifndef im3d_example_h
-#define im3d_example_h
-
 #include "im3d.h"
 
-// Compiler
-#if defined(__GNUC__)
-#define IM3D_COMPILER_GNU
-#elif defined(_MSC_VER)
 #define IM3D_COMPILER_MSVC
-#else
-#error im3d: Compiler not defined
-#endif
-
-// Platform
-#if defined(_WIN32) || defined(_WIN64)
-// Windows
 #define IM3D_PLATFORM_WIN
 
-#define NOMINMAX 1
-#define WIN32_LEAN_AND_MEAN 1
-#define VC_EXTRALEAN 1
 #include <Windows.h>
 
 #define winAssert(e) IM3D_VERIFY_MSG(e, Im3d::GetPlatformErrorString(GetLastError()))
@@ -29,10 +12,6 @@ namespace Im3d
 {
 const char *GetPlatformErrorString(DWORD _err);
 }
-
-#else
-#error im3d: Platform not defined
-#endif
 
 // Graphics API
 #if defined(IM3D_OPENGL)
@@ -65,41 +44,6 @@ const char *GetGlEnumString(GLenum _enum);
 const char *GlGetString(GLenum _name);
 } // namespace Im3d
 
-#elif defined(IM3D_DX11)
-// DirectX 11
-#include <d3d11.h>
-
-#define IM3D_DX11_VSHADER "4_0"
-
-#define dxAssert(call)                                                                         \
-    do                                                                                         \
-    {                                                                                          \
-        HRESULT err = (call);                                                                  \
-        if (err != S_OK)                                                                       \
-        {                                                                                      \
-            Im3d::Assert(#call, __FILE__, __LINE__, Im3d::GetPlatformErrorString((DWORD)err)); \
-            IM3D_BREAK();                                                                      \
-        }                                                                                      \
-    } while (0)
-
-namespace Im3d
-{
-// Return 0 on failure (prints log info to stderr). _defines is a list of null-separated strings e.g. "DEFINE1 1\0DEFINE2 1\0"
-ID3DBlob *LoadCompileShader(const char *_target, const char *_path, const char *_defines = 0);
-
-// Resource helpers.
-ID3D11Buffer *CreateBuffer(UINT _size, D3D11_USAGE _usage, UINT _bind, const void *_data = nullptr);
-ID3D11Buffer *CreateConstantBuffer(UINT _size, D3D11_USAGE _usage, const void *_data = nullptr);
-ID3D11Buffer *CreateVertexBuffer(UINT _size, D3D11_USAGE _usage, const void *_data = nullptr);
-ID3D11Buffer *CreateIndexBuffer(UINT _size, D3D11_USAGE _usage, const void *_data = nullptr);
-void *MapBuffer(ID3D11Buffer *_buffer, D3D11_MAP _mapType);
-void UnmapBuffer(ID3D11Buffer *_buffer);
-ID3D11Texture2D *CreateTexture2D(UINT _width, UINT _height, DXGI_FORMAT _format, ID3D11ShaderResourceView **resView_ = nullptr, const void *_data = nullptr);
-ID3D11DepthStencilView *CreateDepthStencil(UINT _width, UINT _height, DXGI_FORMAT _format);
-} // namespace Im3d
-
-#else
-#error im3d: Graphics API not defined
 #endif
 
 #define IM3D_UNUSED(x)   \
@@ -187,27 +131,14 @@ struct Example
     float m_deltaTime;
 
     // platform/graphics specifics
-#if defined(IM3D_PLATFORM_WIN)
     HWND m_hwnd;
     LARGE_INTEGER m_currTime, m_prevTime;
 
-#if defined(IM3D_OPENGL)
     HDC m_hdc;
     HGLRC m_hglrc;
-
-#elif defined(IM3D_DX11)
-    ID3D11Device *m_d3dDevice;
-    ID3D11DeviceContext *m_d3dDeviceCtx;
-    IDXGISwapChain *m_dxgiSwapChain;
-    ID3D11RenderTargetView *m_d3dRenderTarget;
-    ID3D11DepthStencilView *m_d3dDepthStencil;
-#endif
-#endif
 
 }; // struct Example
 
 extern Example *g_Example;
 
 } // namespace Im3d
-
-#endif // im3d_example_h
