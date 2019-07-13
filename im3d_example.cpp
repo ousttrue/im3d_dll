@@ -2,6 +2,7 @@
 #include "im3d_opengl31.h"
 #include "teapot.h"
 #include "win32_window.h"
+#include "glcontext.h"
 
 #include <cmath>
 #include <cstdio>
@@ -62,104 +63,6 @@ const char *Im3d::GetPlatformErrorString(DWORD _err)
 #include "GL/wglew.h"
 static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormat = 0;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribs = 0;
-
-static bool InitOpenGL(HWND hwnd, int _vmaj, int _vmin)
-{
-    winAssert(g_Example->m_hdc = GetDC(hwnd));
-    HDC hdc = g_Example->m_hdc;
-
-    // set the window pixel format
-    PIXELFORMATDESCRIPTOR pfd = {};
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_GENERIC_ACCELERATED;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.cDepthBits = 24;
-    pfd.dwDamageMask = 8;
-    int pformat = 0;
-    winAssert(pformat = ChoosePixelFormat(hdc, &pfd));
-    winAssert(SetPixelFormat(hdc, pformat, &pfd));
-
-    // create dummy context to load wgl extensions
-    HGLRC hglrc = 0;
-    winAssert(hglrc = wglCreateContext(hdc));
-    winAssert(wglMakeCurrent(hdc, hglrc));
-
-    // check the platform supports the requested GL version
-    GLint platformVMaj, platformVMin;
-    glAssert(glGetIntegerv(GL_MAJOR_VERSION, &platformVMaj));
-    glAssert(glGetIntegerv(GL_MINOR_VERSION, &platformVMin));
-    _vmaj = _vmaj < 0 ? platformVMaj : _vmaj;
-    _vmin = _vmin < 0 ? platformVMin : _vmin;
-    if (platformVMaj < _vmaj || (platformVMaj >= _vmaj && platformVMin < _vmin))
-    {
-        fprintf(stderr, "OpenGL version %d.%d is not available (available version is %d.%d).", _vmaj, _vmin, platformVMaj, platformVMin);
-        fprintf(stderr, "This error may occur if the platform has an integrated GPU.");
-        return false;
-        return 0;
-    }
-
-    // load wgl extensions for true context creation
-    static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribs;
-    winAssert(wglCreateContextAttribs = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB"));
-
-    // delete the dummy context
-    winAssert(wglMakeCurrent(0, 0));
-    winAssert(wglDeleteContext(hglrc));
-
-    // create true context
-    int profileBit = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
-    //profileBit = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
-    int attr[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, _vmaj,
-        WGL_CONTEXT_MINOR_VERSION_ARB, _vmin,
-        WGL_CONTEXT_PROFILE_MASK_ARB, profileBit,
-        0};
-    winAssert(g_Example->m_hglrc = wglCreateContextAttribs(hdc, 0, attr));
-    hglrc = g_Example->m_hglrc;
-
-    // load extensions
-    if (!wglMakeCurrent(hdc, hglrc))
-    {
-        fprintf(stderr, "wglMakeCurrent failed");
-        return false;
-    }
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    IM3D_ASSERT(err == GLEW_OK);
-    glGetError(); // clear any errors caused by glewInit()
-
-    winAssert(wglSwapIntervalEXT(0)); // example uses FPS as a rough perf measure, hence disable vsync
-
-    fprintf(stdout, "OpenGL context:\n\tVersion: %s\n\tGLSL Version: %s\n\tVendor: %s\n\tRenderer: %s\n",
-            GlGetString(GL_VERSION),
-            GlGetString(GL_SHADING_LANGUAGE_VERSION),
-            GlGetString(GL_VENDOR),
-            GlGetString(GL_RENDERER));
-
-    if (_vmaj == 3 && _vmin == 1)
-    {
-        // check that the uniform blocks size is at least 64kb
-        GLint maxUniformBlockSize;
-        glAssert(glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBlockSize));
-        if (maxUniformBlockSize < (64 * 1024))
-        {
-            IM3D_ASSERT(false);
-            fprintf(stderr, "GL_MAX_UNIFORM_BLOCK_SIZE is less than 64kb (%dkb)", maxUniformBlockSize / 1024);
-            return false;
-        }
-    }
-
-    return true;
-}
-
-static void ShutdownOpenGL(HWND hwnd)
-{
-    winAssert(wglMakeCurrent(0, 0));
-    winAssert(wglDeleteContext(g_Example->m_hglrc));
-    winAssert(ReleaseDC(hwnd, g_Example->m_hdc) != 0);
-}
 
 /******************************************************************************/
 static void Append(const char *_str, Vector<char> &_out_)
@@ -385,12 +288,6 @@ const char *Im3d::GetGlEnumString(GLenum _enum)
 #undef CASE_ENUM
 }
 
-const char *Im3d::GlGetString(GLenum _name)
-{
-    const char *ret;
-    glAssert(ret = (const char *)glGetString(_name));
-    return ret ? ret : "";
-}
 #endif // graphics
 
 /******************************************************************************/
@@ -832,7 +729,7 @@ static void ImGui_Update(HWND hwnd, int width, int height)
 Example *Im3d::g_Example = nullptr;
 
 Example::Example()
-    : m_window(new Win32Window)
+    : m_window(new Win32Window), m_glcontext(new GLContext)
 {
 }
 
@@ -840,11 +737,11 @@ Example::~Example()
 {
     ImGui_Shutdown();
     Im3d_Shutdown();
-    ShutdownOpenGL(m_window->GetHandle());
 
     ImGui::EndFrame(); // prevent assert due to locked font atlas in DestroyContext() call below
     ImGui::DestroyContext();
 
+    delete m_glcontext;
     delete m_window;
 }
 
@@ -872,7 +769,7 @@ bool Example::init(int _width, int _height, const char *_title)
         return false;
     }
 
-    if (!InitOpenGL(hwnd, IM3D_OPENGL_VMAJ, IM3D_OPENGL_VMIN))
+    if (!m_glcontext->Initialize(hwnd, IM3D_OPENGL_VMAJ, IM3D_OPENGL_VMIN))
     {
         return false;
     }
@@ -1061,7 +958,7 @@ void Example::draw()
 
     winAssert(ValidateRect(m_window->GetHandle(), 0)); // suppress WM_PAINT
 
-    winAssert(SwapBuffers(m_hdc));
+    m_glcontext->Present();
 
     // reset state & clear backbuffer for next frame
     glAssert(glBindVertexArray(0));

@@ -9,6 +9,7 @@
 #define winAssert(e) IM3D_VERIFY_MSG(e, Im3d::GetPlatformErrorString(GetLastError()))
 
 class Win32Window;
+class GLContext;
 
 namespace Im3d
 {
@@ -106,6 +107,8 @@ void DrawTeapot(const Mat4 &_world, const Mat4 &_viewProj);
 struct Example
 {
     Win32Window *m_window = nullptr;
+    GLContext *m_glcontext = nullptr;
+
     Example();
     ~Example();
 
@@ -136,9 +139,6 @@ struct Example
     // platform/graphics specifics
     LARGE_INTEGER m_currTime = {0};
     LARGE_INTEGER m_prevTime = {0};
-
-    HDC m_hdc = nullptr;
-    HGLRC m_hglrc = nullptr;
 
 }; // struct Example
 
