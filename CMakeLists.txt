@@ -26,6 +26,7 @@ FILE(GLOB SRC
         im3d.cpp
         im3d_example.cpp
         im3d_opengl31.cpp
+        frame.cpp
         imgui/imgui.cpp
         imgui/imgui_draw.cpp
         imgui/imgui_widgets.cpp
