@@ -3,6 +3,7 @@
 #include "teapot.h"
 #include "win32_window.h"
 #include "glcontext.h"
+#include "im3d_context.h"
 
 #include <cmath>
 #include <cstdio>
@@ -10,14 +11,6 @@
 #include <cstring>
 
 using namespace Im3d;
-
-#ifdef IM3D_COMPILER_MSVC
-#pragma warning(disable : 4996) // vsnprintf
-
-#pragma warning(disable : 4311) // typecast
-#pragma warning(disable : 4302) //    "
-#pragma warning(disable : 4312) //    "
-#endif
 
 static const char *StripPath(const char *_path)
 {
@@ -60,9 +53,9 @@ const char *Im3d::GetPlatformErrorString(DWORD _err)
     return buf;
 }
 
-#include "GL/wglew.h"
-static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormat = 0;
-static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribs = 0;
+// #include "GL/wglew.h"
+// static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormat = 0;
+// static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribs = 0;
 
 /******************************************************************************/
 static void Append(const char *_str, Vector<char> &_out_)

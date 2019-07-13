@@ -10,6 +10,7 @@
 
 class Win32Window;
 class GLContext;
+class Im3dContext;
 
 namespace Im3d
 {
@@ -104,11 +105,19 @@ Color RandColor(float _min, float _max);
 void DrawNdcQuad();
 void DrawTeapot(const Mat4 &_world, const Mat4 &_viewProj);
 
-struct Example
+class Example
 {
     Win32Window *m_window = nullptr;
     GLContext *m_glcontext = nullptr;
+    Im3dContext *m_im3d = nullptr;
 
+    // window
+    Vec2 m_prevCursorPos;
+
+    LARGE_INTEGER m_currTime = {0};
+    LARGE_INTEGER m_prevTime = {0};
+
+public:
     Example();
     ~Example();
 
@@ -117,10 +126,10 @@ struct Example
     bool update();
     void draw();
 
-    // window
-    Vec2 m_prevCursorPos;
-
+private:
     bool hasFocus() const;
+
+public:
     Vec2 getWindowRelativeCursor() const;
 
     // 3d camera
@@ -135,10 +144,6 @@ struct Example
     Mat4 m_camViewProj = {0};
 
     float m_deltaTime = 0;
-
-    // platform/graphics specifics
-    LARGE_INTEGER m_currTime = {0};
-    LARGE_INTEGER m_prevTime = {0};
 
 }; // struct Example
 
