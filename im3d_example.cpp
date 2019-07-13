@@ -1,6 +1,7 @@
 #include "im3d_example.h"
 #include "im3d_opengl31.h"
 #include "teapot.h"
+#include "win32_window.h"
 
 #include <cmath>
 #include <cstdio>
@@ -58,178 +59,12 @@ const char *Im3d::GetPlatformErrorString(DWORD _err)
     return buf;
 }
 
-static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARAM _lparam)
-{
-    ImGuiIO &imgui = ImGui::GetIO();
-    Example *im3d = g_Example;
-
-    switch (_umsg)
-    {
-    case WM_SIZE:
-    {
-        int w = (int)LOWORD(_lparam), h = (int)HIWORD(_lparam);
-        if (im3d->m_width != w || im3d->m_height != h)
-        {
-            im3d->m_width = w;
-            im3d->m_height = h;
-        }
-        break;
-    }
-    case WM_SIZING:
-    {
-        RECT *r = (RECT *)_lparam;
-        int w = (int)(r->right - r->left);
-        int h = (int)(r->bottom - r->top);
-        if (im3d->m_width != w || im3d->m_height != h)
-        {
-            im3d->m_width = w;
-            im3d->m_height = h;
-        }
-        break;
-    }
-    case WM_LBUTTONDOWN:
-    case WM_LBUTTONUP:
-        imgui.MouseDown[0] = _umsg == WM_LBUTTONDOWN;
-        break;
-    case WM_MBUTTONDOWN:
-    case WM_MBUTTONUP:
-        imgui.MouseDown[2] = _umsg == WM_MBUTTONDOWN;
-        break;
-    case WM_RBUTTONDOWN:
-    case WM_RBUTTONUP:
-        imgui.MouseDown[1] = _umsg == WM_RBUTTONDOWN;
-        break;
-    case WM_MOUSEWHEEL:
-        imgui.MouseWheel = (float)(GET_WHEEL_DELTA_WPARAM(_wparam)) / (float)(WHEEL_DELTA);
-        break;
-    case WM_MOUSEMOVE:
-        imgui.MousePos.x = LOWORD(_lparam);
-        imgui.MousePos.y = HIWORD(_lparam);
-        break;
-    case WM_SYSKEYDOWN:
-    case WM_SYSKEYUP:
-    case WM_KEYDOWN:
-    case WM_KEYUP:
-    {
-        WPARAM vk = _wparam;
-        UINT sc = (_lparam & 0x00ff0000) >> 16;
-        bool e0 = (_lparam & 0x01000000) != 0;
-        if (vk == VK_SHIFT)
-        {
-            vk = MapVirtualKey(sc, MAPVK_VSC_TO_VK_EX);
-        }
-        switch (vk)
-        {
-        case VK_CONTROL:
-            imgui.KeyCtrl = _umsg == WM_KEYDOWN;
-            break;
-        case VK_MENU:
-            imgui.KeyAlt = _umsg == WM_KEYDOWN;
-            break;
-        case VK_LSHIFT:
-        case VK_RSHIFT:
-            imgui.KeyShift = _umsg == WM_KEYDOWN;
-            break;
-        case VK_ESCAPE:
-            PostQuitMessage(0);
-            break;
-        default:
-            if (vk < 512)
-            {
-                imgui.KeysDown[vk] = _umsg == WM_KEYDOWN;
-            }
-            break;
-        };
-        return 0;
-    }
-    case WM_CHAR:
-        if (_wparam > 0 && _wparam < 0x10000)
-        {
-            imgui.AddInputCharacter((unsigned short)_wparam);
-        }
-        return 0;
-    case WM_PAINT:
-        //IM3D_ASSERT(false); // should be suppressed by calling ValidateRect()
-        break;
-    case WM_CLOSE:
-        PostQuitMessage(0);
-        return 0; // prevent DefWindowProc from destroying the window
-    default:
-        break;
-    };
-    return DefWindowProc(_hwnd, _umsg, _wparam, _lparam);
-}
-
-static bool InitWindow(int &_width_, int &_height_, const char *_title)
-{
-    static ATOM wndclassex = 0;
-    if (wndclassex == 0)
-    {
-        WNDCLASSEX wc;
-        memset(&wc, 0, sizeof(wc));
-        wc.cbSize = sizeof(wc);
-        wc.style = CS_OWNDC; // | CS_HREDRAW | CS_VREDRAW;
-        wc.lpfnWndProc = WindowProc;
-        wc.hInstance = GetModuleHandle(0);
-        wc.lpszClassName = "Im3dTestApp";
-        wc.hCursor = LoadCursor(0, IDC_ARROW);
-        winAssert(wndclassex = RegisterClassEx(&wc));
-    }
-
-    DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-    DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_MINIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
-
-    if (_width_ == -1 || _height_ == -1)
-    {
-        // auto size; get the dimensions of the primary screen area and subtract the non-client area
-        RECT r;
-        winAssert(SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0));
-        _width_ = r.right - r.left;
-        _height_ = r.bottom - r.top;
-
-        RECT wr = {};
-        winAssert(AdjustWindowRectEx(&wr, dwStyle, FALSE, dwExStyle));
-        _width_ -= wr.right - wr.left;
-        _height_ -= wr.bottom - wr.top;
-    }
-
-    RECT r;
-    r.top = 0;
-    r.left = 0;
-    r.bottom = _height_;
-    r.right = _width_;
-    winAssert(AdjustWindowRectEx(&r, dwStyle, FALSE, dwExStyle));
-    g_Example->m_hwnd = CreateWindowEx(
-        dwExStyle,
-        MAKEINTATOM(wndclassex),
-        _title,
-        dwStyle,
-        0, 0,
-        r.right - r.left, r.bottom - r.top,
-        nullptr,
-        nullptr,
-        GetModuleHandle(0),
-        nullptr);
-    IM3D_ASSERT(g_Example->m_hwnd);
-    ShowWindow(g_Example->m_hwnd, SW_SHOW);
-    return true;
-}
-
-static void ShutdownWindow()
-{
-    if (g_Example->m_hwnd)
-    {
-        winAssert(DestroyWindow(g_Example->m_hwnd));
-    }
-}
-
 #include "GL/wglew.h"
 static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormat = 0;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribs = 0;
 
-static bool InitOpenGL(int _vmaj, int _vmin)
+static bool InitOpenGL(HWND hwnd, int _vmaj, int _vmin)
 {
-    HWND hwnd = g_Example->m_hwnd;
     winAssert(g_Example->m_hdc = GetDC(hwnd));
     HDC hdc = g_Example->m_hdc;
 
@@ -319,11 +154,11 @@ static bool InitOpenGL(int _vmaj, int _vmin)
     return true;
 }
 
-static void ShutdownOpenGL()
+static void ShutdownOpenGL(HWND hwnd)
 {
     winAssert(wglMakeCurrent(0, 0));
     winAssert(wglDeleteContext(g_Example->m_hglrc));
-    winAssert(ReleaseDC(g_Example->m_hwnd, g_Example->m_hdc) != 0);
+    winAssert(ReleaseDC(hwnd, g_Example->m_hdc) != 0);
 }
 
 /******************************************************************************/
@@ -961,7 +796,7 @@ static void ImGui_Shutdown()
 #endif
 
 #if defined(IM3D_PLATFORM_WIN)
-static void ImGui_Update()
+static void ImGui_Update(HWND hwnd, int width, int height)
 {
     ImGuiIO &io = ImGui::GetIO();
     io.KeyMap[ImGuiKey_Tab] = VK_TAB;
@@ -984,8 +819,8 @@ static void ImGui_Update()
     io.KeyMap[ImGuiKey_Y] = 0x59;
     io.KeyMap[ImGuiKey_Z] = 0x5A;
 
-    io.ImeWindowHandle = g_Example->m_hwnd;
-    io.DisplaySize = ImVec2((float)g_Example->m_width, (float)g_Example->m_height);
+    io.ImeWindowHandle = hwnd;
+    io.DisplaySize = ImVec2((float)width, (float)height);
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
     io.DeltaTime = g_Example->m_deltaTime;
 
@@ -994,14 +829,29 @@ static void ImGui_Update()
 #endif
 
 /******************************************************************************/
-Example *Im3d::g_Example;
+Example *Im3d::g_Example = nullptr;
+
+Example::Example()
+    : m_window(new Win32Window)
+{
+}
+
+Example::~Example()
+{
+    ImGui_Shutdown();
+    Im3d_Shutdown();
+    ShutdownOpenGL(m_window->GetHandle());
+
+    ImGui::EndFrame(); // prevent assert due to locked font atlas in DestroyContext() call below
+    ImGui::DestroyContext();
+
+    delete m_window;
+}
 
 bool Example::init(int _width, int _height, const char *_title)
 {
     g_Example = this;
-    memset(g_Example, 0, sizeof(Example));
 
-#if defined(IM3D_PLATFORM_WIN)
     //  // force the current working directory to the exe location
     // 	TCHAR buf[MAX_PATH] = {};
     // 	DWORD buflen;
@@ -1013,28 +863,19 @@ bool Example::init(int _width, int _height, const char *_title)
 
     winAssert(QueryPerformanceFrequency(&g_SysTimerFreq));
     winAssert(QueryPerformanceCounter(&m_currTime));
-#endif
 
     ImGui::SetCurrentContext(ImGui::CreateContext()); // can't call this in ImGui_Init() because creating the window ends up calling ImGui::GetIO()
 
-    m_width = _width;
-    m_height = _height;
-    m_title = _title;
-    if (!InitWindow(m_width, m_height, m_title))
+    auto hwnd = m_window->Create(_width, _height, _title);
+    if (!hwnd)
     {
         return false;
     }
-#if defined(IM3D_OPENGL)
-    if (!InitOpenGL(IM3D_OPENGL_VMAJ, IM3D_OPENGL_VMIN))
+
+    if (!InitOpenGL(hwnd, IM3D_OPENGL_VMAJ, IM3D_OPENGL_VMIN))
     {
         return false;
     }
-#elif defined(IM3D_DX11)
-    if (!InitDx11())
-    {
-        return false;
-    }
-#endif
 
     if (!ImGui_Init())
     {
@@ -1051,23 +892,6 @@ bool Example::init(int _width, int _height, const char *_title)
     m_camFovDeg = 50.0f;
 
     return true;
-}
-
-Example::~Example()
-{
-    ImGui_Shutdown();
-    Im3d_Shutdown();
-
-#if defined(IM3D_OPENGL)
-    ShutdownOpenGL();
-#elif defined(IM3D_DX11)
-    ShutdownDx11();
-#endif
-
-    ShutdownWindow();
-
-    ImGui::EndFrame(); // prevent assert due to locked font atlas in DestroyContext() call below
-    ImGui::DestroyContext();
 }
 
 bool Example::update()
@@ -1088,7 +912,9 @@ bool Example::update()
     ret = msg.message != WM_QUIT;
 #endif
 
-    ImGui_Update();
+    int w, h;
+    std::tie(w, h) = m_window->GetSize();
+    ImGui_Update(m_window->GetHandle(), w, h);
 
     float kCamSpeed = 2.0f;
     float kCamSpeedMul = 10.0f;
@@ -1137,7 +963,7 @@ bool Example::update()
         {
             if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
             {
-                Vec2 cursorDelta = ((cursorPos - m_prevCursorPos) / Vec2((float)m_width, (float)m_height)) * kCamRotationMul;
+                Vec2 cursorDelta = ((cursorPos - m_prevCursorPos) / Vec2((float)w, (float)h)) * kCamRotationMul;
                 m_camDir = Rotation(Vec3(0.0f, 1.0f, 0.0f), -cursorDelta.x) * m_camDir;
                 m_camDir = Rotation(m_camWorld.getCol(0), -cursorDelta.y) * m_camDir;
             }
@@ -1149,7 +975,7 @@ bool Example::update()
     m_camFovRad = Im3d::Radians(m_camFovDeg);
     float n = 0.1f;
     float f = 500.0f;
-    float a = (float)m_width / (float)m_height;
+    float a = (float)w / (float)h;
     float scale = tanf(m_camFovRad * 0.5f) * n;
     float viewZ = -1.0f;
 
@@ -1217,7 +1043,7 @@ bool Example::update()
     ImGui::Text("Points:    %u ", Im3d::GetContext().getPrimitiveCount(Im3d::DrawPrimitive_Points));
     ImGui::End();
 
-    Im3d_NewFrame();
+    Im3d_NewFrame(w, h);
 
     return ret;
 }
@@ -1226,47 +1052,33 @@ void Example::draw()
 {
     static const Vec4 kClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 
-    Im3d_EndFrame();
+    int w, h;
+    std::tie(w, h) = m_window->GetSize();
+
+    Im3d_EndFrame(w, h);
 
     ImGui::Render();
 
-#if defined(IM3D_PLATFORM_WIN)
-    winAssert(ValidateRect(m_hwnd, 0)); // suppress WM_PAINT
+    winAssert(ValidateRect(m_window->GetHandle(), 0)); // suppress WM_PAINT
 
-#if defined(IM3D_OPENGL)
     winAssert(SwapBuffers(m_hdc));
-#elif defined(IM3D_DX11)
-    m_dxgiSwapChain->Present(0, 0);
-#endif
-#endif
 
     // reset state & clear backbuffer for next frame
-#if defined(IM3D_OPENGL)
     glAssert(glBindVertexArray(0));
     glAssert(glUseProgram(0));
-    glAssert(glViewport(0, 0, m_width, m_height));
+    glAssert(glViewport(0, 0, w, h));
     glAssert(glClearColor(kClearColor.x, kClearColor.y, kClearColor.z, kClearColor.w));
     glAssert(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-#elif defined(IM3D_DX11)
-    m_d3dDeviceCtx->ClearRenderTargetView(m_d3dRenderTarget, kClearColor);
-    m_d3dDeviceCtx->ClearDepthStencilView(m_d3dDepthStencil, D3D11_CLEAR_DEPTH, 1.0f, 0xff);
-#endif
 }
 
 bool Example::hasFocus() const
 {
-#if defined(IM3D_PLATFORM_WIN)
-    return m_hwnd == GetFocus();
-#endif
+    return m_window->HasFocus();
 }
 
 Vec2 Example::getWindowRelativeCursor() const
 {
-#if defined(IM3D_PLATFORM_WIN)
-    POINT p = {};
-    winAssert(GetCursorPos(&p));
-    winAssert(ScreenToClient(m_hwnd, &p));
-    return Vec2((float)p.x, (float)p.y);
-#endif
+    int x, y;
+    std::tie(x, y) = m_window->GetCursorPosition();
+    return Vec2(static_cast<float>(x), static_cast<float>(y));
 }

@@ -8,6 +8,8 @@
 
 #define winAssert(e) IM3D_VERIFY_MSG(e, Im3d::GetPlatformErrorString(GetLastError()))
 
+class Win32Window;
+
 namespace Im3d
 {
 const char *GetPlatformErrorString(DWORD _err);
@@ -103,39 +105,40 @@ void DrawTeapot(const Mat4 &_world, const Mat4 &_viewProj);
 
 struct Example
 {
+    Win32Window *m_window = nullptr;
+    Example();
     ~Example();
+
     bool init(int _width, int _height, const char *_title);
 
     bool update();
     void draw();
 
     // window
-    int m_width, m_height;
-    const char *m_title;
     Vec2 m_prevCursorPos;
 
     bool hasFocus() const;
     Vec2 getWindowRelativeCursor() const;
 
     // 3d camera
-    bool m_camOrtho;
-    Vec3 m_camPos;
-    Vec3 m_camDir;
-    float m_camFovDeg;
-    float m_camFovRad;
-    Mat4 m_camWorld;
-    Mat4 m_camView;
-    Mat4 m_camProj;
-    Mat4 m_camViewProj;
+    bool m_camOrtho = false;
+    Vec3 m_camPos = {0};
+    Vec3 m_camDir = {0};
+    float m_camFovDeg = 0;
+    float m_camFovRad = 0;
+    Mat4 m_camWorld = {0};
+    Mat4 m_camView = {0};
+    Mat4 m_camProj = {0};
+    Mat4 m_camViewProj = {0};
 
-    float m_deltaTime;
+    float m_deltaTime = 0;
 
     // platform/graphics specifics
-    HWND m_hwnd;
-    LARGE_INTEGER m_currTime, m_prevTime;
+    LARGE_INTEGER m_currTime = {0};
+    LARGE_INTEGER m_prevTime = {0};
 
-    HDC m_hdc;
-    HGLRC m_hglrc;
+    HDC m_hdc = nullptr;
+    HGLRC m_hglrc = nullptr;
 
 }; // struct Example
 
