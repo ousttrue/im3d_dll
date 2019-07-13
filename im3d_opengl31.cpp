@@ -3,6 +3,7 @@
 	vertex shader to expand points/lines into triangle strips. This works by uploading Im3d vertex data
 	to a uniform buffer and fetching manually in the vertex shader.
 */
+#include "im3d_opengl31.h"
 #include "im3d_example.h"
 
 static GLuint g_Im3dVertexArray;

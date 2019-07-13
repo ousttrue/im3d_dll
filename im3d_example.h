@@ -210,10 +210,4 @@ extern Example *g_Example;
 
 } // namespace Im3d
 
-// per-example implementations (in the example .cpp)
-extern bool Im3d_Init();
-extern void Im3d_Shutdown();
-extern void Im3d_NewFrame();
-extern void Im3d_EndFrame();
-
 #endif // im3d_example_h
