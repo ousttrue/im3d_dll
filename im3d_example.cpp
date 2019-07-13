@@ -32,7 +32,6 @@ static const char *StripPath(const char *_path)
 }
 
 /******************************************************************************/
-#if defined(IM3D_PLATFORM_WIN)
 // force Nvidia/AMD drivers to use the discrete GPU
 extern "C"
 {
@@ -74,22 +73,6 @@ static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARA
             im3d->m_width = w;
             im3d->m_height = h;
         }
-#if defined(IM3D_DX11)
-        // DX requires that we reset the backbuffer when the window resizes
-        if (g_Example->m_d3dRenderTarget)
-        {
-            g_Example->m_d3dRenderTarget->Release();
-            g_Example->m_d3dDepthStencil->Release();
-            dxAssert(g_Example->m_dxgiSwapChain->ResizeBuffers(0, (UINT)w, (UINT)h, DXGI_FORMAT_UNKNOWN, 0));
-            ID3D11Texture2D *backBuffer;
-            dxAssert(g_Example->m_dxgiSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&backBuffer));
-            dxAssert(g_Example->m_d3dDevice->CreateRenderTargetView(backBuffer, nullptr, &g_Example->m_d3dRenderTarget));
-            g_Example->m_d3dDepthStencil = CreateDepthStencil((UINT)w, (UINT)h, DXGI_FORMAT_D24_UNORM_S8_UINT);
-            g_Example->m_d3dDeviceCtx->OMSetRenderTargets(1, &g_Example->m_d3dRenderTarget, g_Example->m_d3dDepthStencil);
-            backBuffer->Release();
-        }
-
-#endif
         break;
     }
     case WM_SIZING:
@@ -342,8 +325,6 @@ static void ShutdownOpenGL()
     winAssert(wglDeleteContext(g_Example->m_hglrc));
     winAssert(ReleaseDC(g_Example->m_hwnd, g_Example->m_hdc) != 0);
 }
-
-#endif // platform
 
 /******************************************************************************/
 static void Append(const char *_str, Vector<char> &_out_)
