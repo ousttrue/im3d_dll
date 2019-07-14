@@ -142,7 +142,7 @@ void Im3d_NewFrame(int x, int y, const camera::CameraState *c)
     // ad.m_deltaTime = g_Example->m_deltaTime;
     ad.m_viewportSize = Im3d::Vec2(c->viewportWidth, c->viewportHeight);
     ad.m_viewOrigin = Im3d::Vec3(c->viewInverse[12], c->viewInverse[13], c->viewInverse[14]); // for VR use the head position
-    ad.m_viewDirection = Im3d::Vec3(c->viewInverse[8], c->viewInverse[9], c->viewInverse[10]);
+    ad.m_viewDirection = Im3d::Vec3(-c->viewInverse[8], -c->viewInverse[9], -c->viewInverse[10]);
     ad.m_worldUp = Im3d::Vec3(0.0f, 1.0f, 0.0f); // used internally for generating orthonormal bases
     ad.m_projOrtho = false;
 
