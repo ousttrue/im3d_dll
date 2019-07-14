@@ -7,9 +7,11 @@
 #include <GL/glew.h>
 #include <assert.h>
 #include <Windows.h>
-#include "im3d.h"
 #include "glutil.h"
 #include "scene.h"
+#include "camera_state.h"
+#include <im3d.h>
+#include <im3d_math.h>
 
 static GLuint g_Im3dVertexArray;
 static GLuint g_Im3dVertexBuffer;
@@ -133,49 +135,48 @@ void Im3d_Shutdown()
 // At the top of each frame, the application must fill the Im3d::AppData struct and then call Im3d::NewFrame().
 // The example below shows how to do this, in particular how to generate the 'cursor ray' from a mouse position
 // which is necessary for interacting with gizmos.
-void Im3d_NewFrame(int x, int y, int w, int h, Scene *g_Example)
+void Im3d_NewFrame(int x, int y, const camera::CameraState *c)
 {
     auto &ad = Im3d::GetAppData();
 
     // ad.m_deltaTime = g_Example->m_deltaTime;
-    ad.m_viewportSize = Im3d::Vec2((float)w, (float)h);
-    ad.m_viewOrigin = g_Example->m_camPos; // for VR use the head position
-    ad.m_viewDirection = g_Example->m_camDir;
+    ad.m_viewportSize = Im3d::Vec2(c->viewportWidth, c->viewportHeight);
+    ad.m_viewOrigin = Im3d::Vec3(c->viewInverse[12], c->viewInverse[13], c->viewInverse[14]); // for VR use the head position
+    ad.m_viewDirection = Im3d::Vec3(c->viewInverse[8], c->viewInverse[9], c->viewInverse[10]);
     ad.m_worldUp = Im3d::Vec3(0.0f, 1.0f, 0.0f); // used internally for generating orthonormal bases
-    ad.m_projOrtho = g_Example->m_camOrtho;
+    ad.m_projOrtho = false;
 
     // m_projScaleY controls how gizmos are scaled in world space to maintain a constant screen height
-    ad.m_projScaleY = g_Example->m_camOrtho
-                          ? 2.0f / g_Example->m_camProj(1, 1)          // use far plane height for an ortho projection
-                          : tanf(g_Example->m_camFovRad * 0.5f) * 2.0f // or vertical fov for a perspective projection
+    ad.m_projScaleY = tanf(c->fovYRadians * 0.5f) * 2.0f // or vertical fov for a perspective projection
         ;
 
     // World space cursor ray from mouse position; for VR this might be the position/orientation of the HMD or a tracked controller.
-    Im3d::Vec2 cursorPos(x, y);
+    Im3d::Vec2 cursorPos((float)x, (float)y);
     cursorPos = (cursorPos / ad.m_viewportSize) * 2.0f - 1.0f;
     cursorPos.y = -cursorPos.y; // window origin is top-left, ndc is bottom-left
     Im3d::Vec3 rayOrigin, rayDirection;
-    if (g_Example->m_camOrtho)
-    {
-        rayOrigin.x = cursorPos.x / g_Example->m_camProj(0, 0);
-        rayOrigin.y = cursorPos.y / g_Example->m_camProj(1, 1);
-        rayOrigin.z = 0.0f;
-        rayOrigin = g_Example->m_camWorld * Im3d::Vec4(rayOrigin, 1.0f);
-        rayDirection = g_Example->m_camWorld * Im3d::Vec4(0.0f, 0.0f, -1.0f, 0.0f);
-    }
-    else
     {
         rayOrigin = ad.m_viewOrigin;
-        rayDirection.x = cursorPos.x / g_Example->m_camProj(0, 0);
-        rayDirection.y = cursorPos.y / g_Example->m_camProj(1, 1);
+        rayDirection.x = cursorPos.x / c->projection[0];
+        rayDirection.y = cursorPos.y / c->projection[5];
         rayDirection.z = -1.0f;
-        rayDirection = g_Example->m_camWorld * Im3d::Vec4(Im3d::Normalize(rayDirection), 0.0f);
+        Im3d::Mat4 camWorld(
+            c->viewInverse[0], c->viewInverse[1], c->viewInverse[2], c->viewInverse[3],
+            c->viewInverse[4], c->viewInverse[5], c->viewInverse[6], c->viewInverse[7],
+            c->viewInverse[8], c->viewInverse[9], c->viewInverse[10], c->viewInverse[11],
+            c->viewInverse[12], c->viewInverse[13], c->viewInverse[14], c->viewInverse[15]);
+        rayDirection = camWorld * Im3d::Vec4(Im3d::Normalize(rayDirection), 0.0f);
     }
     ad.m_cursorRayOrigin = rayOrigin;
     ad.m_cursorRayDirection = rayDirection;
 
     // Set cull frustum planes. This is only required if IM3D_CULL_GIZMOS or IM3D_CULL_PRIMTIIVES is enable via im3d_config.h, or if any of the IsVisible() functions are called.
-    ad.setCullFrustum(g_Example->m_camViewProj, true);
+    Im3d::Mat4 viewProj(
+        c->viewProjection[0], c->viewProjection[1], c->viewProjection[2], c->viewProjection[3],
+        c->viewProjection[4], c->viewProjection[5], c->viewProjection[6], c->viewProjection[7],
+        c->viewProjection[8], c->viewProjection[9], c->viewProjection[10], c->viewProjection[11],
+        c->viewProjection[12], c->viewProjection[13], c->viewProjection[14], c->viewProjection[15]);
+    ad.setCullFrustum(viewProj, true);
 
     // Fill the key state array; using GetAsyncKeyState here but this could equally well be done via the window proc.
     // All key states have an equivalent (and more descriptive) 'Action_' enum.

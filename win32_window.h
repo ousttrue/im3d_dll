@@ -1,19 +1,25 @@
 #pragma once
-#include <Windows.h>
+#include "mouse_state.h"
 #include <tuple>
 
+///
+/// Windows API Window
+///
+/// * window size
+/// * mouse inputs
+///
 class Win32Window
 {
-    class Impl *m_impl = nullptr;
+    class Win32WindowImpl *m_impl = nullptr;
 
 public:
     Win32Window();
     ~Win32Window();
-    HWND Create(int w, int h, const char *title);
-    HWND GetHandle() const;
+    bool Create(int w, int h, const wchar_t *title);
+    bool IsRunning();
+    void *GetHandle() const;
     std::tuple<int, int> GetSize() const;
     bool HasFocus() const;
-    std::tuple<int, int> GetCursorPosition() const;
-    void Win32Window::UpdateImGui();
-    float GetDeltaTime() const;
+    MouseState GetMouseState() const;
+    float GetTimeSeconds() const;
 };
