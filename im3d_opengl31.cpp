@@ -6,6 +6,7 @@
 #include "im3d_opengl31.h"
 #include <GL/glew.h>
 #include <assert.h>
+#include <Windows.h>
 #include "im3d.h"
 #include "glutil.h"
 #include "scene.h"
@@ -176,7 +177,6 @@ void Im3d_NewFrame(int x, int y, int w, int h, Scene *g_Example)
     // Set cull frustum planes. This is only required if IM3D_CULL_GIZMOS or IM3D_CULL_PRIMTIIVES is enable via im3d_config.h, or if any of the IsVisible() functions are called.
     ad.setCullFrustum(g_Example->m_camViewProj, true);
 
-#if 0
     // Fill the key state array; using GetAsyncKeyState here but this could equally well be done via the window proc.
     // All key states have an equivalent (and more descriptive) 'Action_' enum.
     ad.m_keyDown[Im3d::Mouse_Left /*Im3d::Action_Select*/] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
@@ -192,7 +192,6 @@ void Im3d_NewFrame(int x, int y, int w, int h, Scene *g_Example)
     ad.m_snapTranslation = ctrlDown ? 0.1f : 0.0f;
     ad.m_snapRotation = ctrlDown ? Im3d::Radians(30.0f) : 0.0f;
     ad.m_snapScale = ctrlDown ? 0.5f : 0.0f;
-#endif
 
     Im3d::NewFrame();
 }

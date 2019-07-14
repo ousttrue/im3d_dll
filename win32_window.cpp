@@ -1,6 +1,7 @@
 #include "win32_window.h"
-#include <imgui/imgui.h>
+// #include <imgui/imgui.h>
 #include <string>
+#include <assert.h>
 
 static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARAM _lparam);
 
@@ -107,12 +108,16 @@ public:
         m_deltaTime = (float)(microseconds / 1000000.0);
         return m_deltaTime;
     }
+    float GetDeltaTime()const
+    {
+        return m_deltaTime;
+    }
 };
 Impl *g_impl = nullptr;
 
 static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARAM _lparam)
 {
-    ImGuiIO &imgui = ImGui::GetIO();
+    // ImGuiIO &imgui = ImGui::GetIO();
     // Example *im3d = g_Example;
 
     switch (_umsg)
@@ -138,6 +143,8 @@ static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARA
         break;
     }
     */
+
+   #if 0
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
         imgui.MouseDown[0] = _umsg == WM_LBUTTONDOWN;
@@ -199,6 +206,7 @@ static LRESULT CALLBACK WindowProc(HWND _hwnd, UINT _umsg, WPARAM _wparam, LPARA
             imgui.AddInputCharacter((unsigned short)_wparam);
         }
         return 0;
+#endif
     case WM_PAINT:
         //IM3D_ASSERT(false); // should be suppressed by calling ValidateRect()
         break;
@@ -251,6 +259,7 @@ std::tuple<int, int> Win32Window::GetCursorPosition() const
 
 void Win32Window::UpdateImGui()
 {
+#if 0
     ImGuiIO &io = ImGui::GetIO();
     io.KeyMap[ImGuiKey_Tab] = VK_TAB;
     io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
@@ -278,4 +287,10 @@ void Win32Window::UpdateImGui()
     io.DisplaySize = ImVec2((float)w, (float)h);
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
     io.DeltaTime = m_impl->UpdateTime();
+#endif
+}
+
+float Win32Window::GetDeltaTime() const
+{
+    return m_impl->GetDeltaTime();
 }

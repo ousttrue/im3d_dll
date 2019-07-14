@@ -3,62 +3,63 @@
 #include <GL/glew.h>
 #include "glutil.h"
 #include "teapot.h"
+#include <Windows.h>
 
 Scene::Scene()
 {
 }
 
-void Scene::Update(int mouseX, int mouseY, int windowW, int windowH)
+void Scene::Update(int mouseX, int mouseY, int windowW, int windowH, float m_deltaTime, const Im3d::Vec2 cursorPosDelta)
 {
     float kCamSpeed = 2.0f;
     float kCamSpeedMul = 10.0f;
     float kCamRotationMul = 10.0f;
-    // m_camWorld = Im3d::LookAt(m_camPos, m_camPos - m_camDir);
-    // m_camView = Im3d::Inverse(m_camWorld);
+    m_camWorld = Im3d::LookAt(m_camPos, m_camPos - m_camDir);
+    m_camView = Im3d::Inverse(m_camWorld);
 
     // if (!ImGui::GetIO().WantCaptureKeyboard)
-    // {
-    //     if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
-    //     {
-    //         kCamSpeed *= 10.0f;
-    //     }
-    //     if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) == 0)
-    //     { // ctrl not pressed
-    //         if (GetAsyncKeyState(0x57) & 0x8000)
-    //         { // W (forward)
-    //             m_camPos = m_camPos - m_camWorld.getCol(2) * (m_deltaTime * kCamSpeed);
-    //         }
-    //         if (GetAsyncKeyState(0x41) & 0x8000)
-    //         { // A (left)
-    //             m_camPos = m_camPos - m_camWorld.getCol(0) * (m_deltaTime * kCamSpeed);
-    //         }
-    //         if (GetAsyncKeyState(0x53) & 0x8000)
-    //         { // S (backward)
-    //             m_camPos = m_camPos + m_camWorld.getCol(2) * (m_deltaTime * kCamSpeed);
-    //         }
-    //         if (GetAsyncKeyState(0x44) & 0x8000)
-    //         { // D (right)
-    //             m_camPos = m_camPos + m_camWorld.getCol(0) * (m_deltaTime * kCamSpeed);
-    //         }
-    //         if (GetAsyncKeyState(0x51) & 0x8000)
-    //         { // Q (down)
-    //             m_camPos = m_camPos - m_camWorld.getCol(1) * (m_deltaTime * kCamSpeed);
-    //         }
-    //         if (GetAsyncKeyState(0x45) & 0x8000)
-    //         { // D (up)
-    //             m_camPos = m_camPos + m_camWorld.getCol(1) * (m_deltaTime * kCamSpeed);
-    //         }
-    //     }
-    // }
+    {
+        if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+        {
+            kCamSpeed *= 10.0f;
+        }
+        if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) == 0)
+        { // ctrl not pressed
+            if (GetAsyncKeyState(0x57) & 0x8000)
+            { // W (forward)
+                m_camPos = m_camPos - m_camWorld.getCol(2) * (m_deltaTime * kCamSpeed);
+            }
+            if (GetAsyncKeyState(0x41) & 0x8000)
+            { // A (left)
+                m_camPos = m_camPos - m_camWorld.getCol(0) * (m_deltaTime * kCamSpeed);
+            }
+            if (GetAsyncKeyState(0x53) & 0x8000)
+            { // S (backward)
+                m_camPos = m_camPos + m_camWorld.getCol(2) * (m_deltaTime * kCamSpeed);
+            }
+            if (GetAsyncKeyState(0x44) & 0x8000)
+            { // D (right)
+                m_camPos = m_camPos + m_camWorld.getCol(0) * (m_deltaTime * kCamSpeed);
+            }
+            if (GetAsyncKeyState(0x51) & 0x8000)
+            { // Q (down)
+                m_camPos = m_camPos - m_camWorld.getCol(1) * (m_deltaTime * kCamSpeed);
+            }
+            if (GetAsyncKeyState(0x45) & 0x8000)
+            { // D (up)
+                m_camPos = m_camPos + m_camWorld.getCol(1) * (m_deltaTime * kCamSpeed);
+            }
+        }
+    }
     // if (!ImGui::GetIO().WantCaptureMouse)
-    // {
-    //     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
-    //     {
-    //         Vec2 cursorDelta = ((cursorPos - m_prevCursorPos) / Vec2((float)w, (float)h)) * kCamRotationMul;
-    //         m_camDir = Rotation(Vec3(0.0f, 1.0f, 0.0f), -cursorDelta.x) * m_camDir;
-    //         m_camDir = Rotation(m_camWorld.getCol(0), -cursorDelta.y) * m_camDir;
-    //     }
-    // }
+    {
+        if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
+        {
+            auto cursorDelta = (cursorPosDelta / Im3d::Vec2((float)windowW, (float)windowH)) * kCamRotationMul;
+            m_camDir = Im3d::Rotation(Im3d::Vec3(0.0f, 1.0f, 0.0f), -cursorDelta.x) * m_camDir;
+            m_camDir = Im3d::Rotation(m_camWorld.getCol(0), -cursorDelta.y) * m_camDir;
+        }
+    }
 
     // m_prevCursorPos = cursorPos;
     m_camFovRad = Im3d::Radians(m_camFovDeg);

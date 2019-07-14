@@ -192,4 +192,6 @@ void GLClearState(int w, int h)
     glViewport(0, 0, w, h);
     glClearColor(kClearColor.x, kClearColor.y, kClearColor.z, kClearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glDisable(GL_BLEND);
 }

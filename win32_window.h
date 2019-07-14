@@ -15,4 +15,5 @@ public:
     bool HasFocus() const;
     std::tuple<int, int> GetCursorPosition() const;
     void Win32Window::UpdateImGui();
+    float GetDeltaTime() const;
 };

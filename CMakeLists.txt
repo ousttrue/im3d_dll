@@ -24,9 +24,6 @@ ADD_COMPILE_OPTIONS(
 
 FILE(GLOB SRC
         *.cpp
-        imgui/imgui.cpp
-        imgui/imgui_draw.cpp
-        imgui/imgui_widgets.cpp
         GL/glew.c
     ) 
 ADD_EXECUTABLE(${PROJECT_NAME}

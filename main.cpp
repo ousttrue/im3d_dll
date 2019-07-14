@@ -1,5 +1,3 @@
-#include "frame.h"
-#include "imgui_opengl.h"
 #include "win32_window.h"
 #include "glcontext.h"
 #include "im3d_opengl31.h"
@@ -9,7 +7,6 @@
 int main(int, char **)
 {
     Win32Window window;
-    ImGui::SetCurrentContext(ImGui::CreateContext()); // can't call this in ImGui_Init() because creating the window ends up calling ImGui::GetIO()
     auto hwnd = window.Create(-1, -1, "Im3d Example");
     if (!hwnd)
     {
@@ -22,11 +19,6 @@ int main(int, char **)
         return 2;
     }
 
-    if (!ImGui_Init())
-    {
-        return 3;
-    }
-
     if (!Im3d_Init())
     {
         return 4;
@@ -34,6 +26,8 @@ int main(int, char **)
 
     Scene scene;
 
+    int last_x = -1;
+    int last_y = -1;
     while (true)
     {
         // update
@@ -50,55 +44,69 @@ int main(int, char **)
 
         int x, y, w, h;
         std::tie(x, y) = window.GetCursorPosition();
+        Im3d::Vec2 cursorDelta(0, 0);
+        if (last_x != -1 && last_y != -1)
+        {
+            cursorDelta = Im3d::Vec2(x - last_x, y - last_y);
+        }
+        last_x = x;
+        last_y = y;
         std::tie(w, h) = window.GetSize();
-        window.UpdateImGui();
-        scene.Update(x, y, w, h);
+        // window.UpdateImGui();
+        scene.Update(x, y, w, h, window.GetDeltaTime(), cursorDelta);
 
-        ImGui::NewFrame();
+        // Unified gizmo operates directly on a 4x4 matrix using the context-global gizmo modes.
+        static Im3d::Mat4 transform(1.0f);
+
+        // reset state & clear backbuffer for next frame
+        GLClearState(w, h);
 
         Im3d_NewFrame(x, y, w, h, &scene);
 
-        // ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-        // ImGui::Begin(
-        //     "Frame Info", 0,
-        //     ImGuiWindowFlags_NoTitleBar |
-        //         ImGuiWindowFlags_NoResize |
-        //         ImGuiWindowFlags_NoMove |
-        //         ImGuiWindowFlags_NoSavedSettings |
-        //         ImGuiWindowFlags_AlwaysAutoResize);
-        // ImGui::Text("%.2f fps", 1.0f / m_deltaTime);
-        // ImGui::Text("Layers:    %u ", Im3d::GetContext().getLayerCount());
-        // ImGui::Text("Triangles: %u ", Im3d::GetContext().getPrimitiveCount(Im3d::DrawPrimitive_Triangles));
-        // ImGui::Text("Lines:     %u ", Im3d::GetContext().getPrimitiveCount(Im3d::DrawPrimitive_Lines));
-        // ImGui::Text("Points:    %u ", Im3d::GetContext().getPrimitiveCount(Im3d::DrawPrimitive_Points));
-        // ImGui::End();
-
         // frame begin
 
-        ImGui::Begin("Im3d Demo", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        // The ID passed to Gizmo() should be unique during a frame - to create gizmos in a loop use PushId()/PopId().
+        if (Im3d::Gizmo("GizmoUnified", transform))
+        {
+            // if Gizmo() returns true, the transform was modified
+            switch (Im3d::GetContext().m_gizmoMode)
+            {
+            case Im3d::GizmoMode_Translation:
+            {
+                Im3d::Vec3 pos = transform.getTranslation();
+                // ImGui::Text("Position: %.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
+                break;
+            }
+            case Im3d::GizmoMode_Rotation:
+            {
+                Im3d::Vec3 euler = Im3d::ToEulerXYZ(transform.getRotation());
+                // ImGui::Text("Rotation: %.3f, %.3f, %.3f", Im3d::Degrees(euler.x), Im3d::Degrees(euler.y), Im3d::Degrees(euler.z));
+                break;
+            }
+            case Im3d::GizmoMode_Scale:
+            {
+                Im3d::Vec3 scale = transform.getScale();
+                // ImGui::Text("Scale: %.3f, %.3f, %.3f", scale.x, scale.y, scale.z);
+                break;
+            }
+            default:
+                break;
+            };
+        }
 
-        Frame(scene);
-
-        // frame end
-
-        ImGui::End();
+        // Using the transform for drawing *after* the call to Gizmo() causes a 1 frame lag between the gizmo position and the output
+        // matrix - this can only be avoided if it's possible to issue the draw call *before* calling Gizmo().
+        scene.DrawTeapot(transform);
 
         // draw
         Im3d_EndFrame(w, h, scene.m_camViewProj);
-
-        ImGui::Render();
 
         ValidateRect(window.GetHandle(), 0); // suppress WM_PAINT
 
         glcontext.Present();
 
-        // reset state & clear backbuffer for next frame
-        GLClearState(w, h);
     }
     Im3d_Shutdown();
-    ImGui::EndFrame(); // prevent assert due to locked font atlas in DestroyContext() call below
-    ImGui::DestroyContext();
-    ImGui_Shutdown();
 
     return 0;
 }

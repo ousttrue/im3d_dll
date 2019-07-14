@@ -22,6 +22,6 @@ public:
 
 public:
     Scene();
-    void Update(int mouseX, int mouseY, int windowW, int windowH);
+    void Update(int mouseX, int mouseY, int windowW, int windowH, float deltaTime, const Im3d::Vec2 cursorPosDelta);
     void DrawTeapot(const float *world);
 };
