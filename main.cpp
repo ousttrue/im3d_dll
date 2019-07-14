@@ -1,11 +1,9 @@
 #include "win32_window.h"
 #include "glcontext.h"
 #include "im3d_gui.h"
-#include "scene.h"
-#include "glutil.h"
 #include "orbit_camera.h"
-#include <im3d.h>
-#include <im3d_math.h>
+#include "gl3_renderer.h"
+
 
 int main(int, char **)
 {
@@ -23,12 +21,18 @@ int main(int, char **)
 
     Im3dGui gui;
 
-    Scene scene;
-
     OrbitCamera camera;
 
     // Unified gizmo operates directly on a 4x4 matrix using the context-global gizmo modes.
-    static Im3d::Mat4 transform(1.0f);
+    //static Im3d::Mat4 transform(1.0f);
+    static std::array<float, 16> transform = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+    };
+
+    GL3Renderer renderer;
 
     while (window.IsRunning())
     {
@@ -36,21 +40,16 @@ int main(int, char **)
         auto mouse = window.GetMouseState();
         std::tie(w, h) = window.GetSize();
         camera.SetScreenSize((float)w, (float)h);
-        // window.UpdateImGui();
         camera.MouseInput(mouse);
         camera.state.CalcViewProjection();
 
-        // reset state & clear backbuffer for next frame
-        GLClearState(w, h);
+        renderer.NewFrame(w, h);
 
         gui.NewFrame(&camera.state, &mouse, 0);
 
-        // The ID passed to Gizmo() should be unique during a frame - to create gizmos in a loop use PushId()/PopId().
-        Im3d::Gizmo("GizmoUnified", transform);
+        gui.Manipulate(transform.data());
 
-        // Using the transform for drawing *after* the call to Gizmo() causes a 1 frame lag between the gizmo position and the output
-        // matrix - this can only be avoided if it's possible to issue the draw call *before* calling Gizmo().
-        scene.DrawTeapot(camera.state.viewProjection.data(), transform);
+        renderer.DrawTeapot(camera.state.viewProjection.data(), transform.data());
 
         // draw
         gui.Draw(camera.state.viewProjection.data(), w, h);
