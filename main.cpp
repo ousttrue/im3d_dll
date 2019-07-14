@@ -1,5 +1,5 @@
 #include "win32_window.h"
-#include "glcontext.h"
+#include "wgl_context.h"
 #include "im3d_gui.h"
 #include "orbit_camera.h"
 #include "gl3_renderer.h"
@@ -13,8 +13,8 @@ int main(int, char **)
         return 1;
     }
 
-    GLContext glcontext;
-    if (!glcontext.Initialize((HWND)window.GetHandle(), 3, 0))
+    WGLContext glcontext;
+    if (!glcontext.Create(window.GetHandle(), 3, 0))
     {
         return 2;
     }
@@ -53,8 +53,6 @@ int main(int, char **)
 
         // draw
         gui.Draw(camera.state.viewProjection.data(), w, h);
-
-        ValidateRect((HWND)window.GetHandle(), 0); // suppress WM_PAINT
 
         glcontext.Present();
     }

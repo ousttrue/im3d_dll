@@ -1,4 +1,4 @@
-#include "glcontext.h"
+#include "wgl_context.h"
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #include <stdio.h>
@@ -11,21 +11,21 @@ static const char *GlGetString(GLenum _name)
     return ret ? ret : "";
 }
 
-class GLContextImpl
+class WGLContextImpl
 {
     HWND m_hwnd = nullptr;
     HDC m_hdc = nullptr;
     HGLRC m_hglrc = nullptr;
 
 public:
-    ~GLContextImpl()
+    ~WGLContextImpl()
     {
         wglMakeCurrent(0, 0);
         wglDeleteContext(m_hglrc);
         ReleaseDC(m_hwnd, m_hdc);
     }
 
-    bool Initialize(HWND hwnd, int _vmaj, int _vmin)
+    bool Initialize(HWND hwnd, int major, int minor)
     {
         m_hwnd = hwnd;
         m_hdc = GetDC(hwnd);
@@ -54,11 +54,11 @@ public:
             GLint platformVMaj, platformVMin;
             glGetIntegerv(GL_MAJOR_VERSION, &platformVMaj);
             glGetIntegerv(GL_MINOR_VERSION, &platformVMin);
-            _vmaj = _vmaj < 0 ? platformVMaj : _vmaj;
-            _vmin = _vmin < 0 ? platformVMin : _vmin;
-            if (platformVMaj < _vmaj || (platformVMaj >= _vmaj && platformVMin < _vmin))
+            major = major < 0 ? platformVMaj : major;
+            minor = minor < 0 ? platformVMin : minor;
+            if (platformVMaj < major || (platformVMaj >= major && platformVMin < minor))
             {
-                fprintf(stderr, "OpenGL version %d.%d is not available (available version is %d.%d).", _vmaj, _vmin, platformVMaj, platformVMin);
+                fprintf(stderr, "OpenGL version %d.%d is not available (available version is %d.%d).", major, minor, platformVMaj, platformVMin);
                 fprintf(stderr, "This error may occur if the platform has an integrated GPU.");
                 return false;
             }
@@ -75,8 +75,8 @@ public:
         int profileBit = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
         //profileBit = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
         int attr[] = {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, _vmaj,
-            WGL_CONTEXT_MINOR_VERSION_ARB, _vmin,
+            WGL_CONTEXT_MAJOR_VERSION_ARB, major,
+            WGL_CONTEXT_MINOR_VERSION_ARB, minor,
             WGL_CONTEXT_PROFILE_MASK_ARB, profileBit,
             0};
 
@@ -101,7 +101,7 @@ public:
                 GlGetString(GL_VENDOR),
                 GlGetString(GL_RENDERER));
 
-        if (_vmaj == 3 && _vmin == 1)
+        if (major == 3 && minor == 1)
         {
             // check that the uniform blocks size is at least 64kb
             GLint maxUniformBlockSize;
@@ -122,22 +122,24 @@ public:
     }
 };
 
-GLContext::GLContext()
-    : m_impl(new GLContextImpl)
+WGLContext::WGLContext()
+    : m_impl(new WGLContextImpl)
 {
 }
 
-GLContext::~GLContext()
+WGLContext::~WGLContext()
 {
     delete m_impl;
 }
 
-bool GLContext::Initialize(HWND hwnd, int _vmaj, int _vmin)
+bool WGLContext::Create(void* hwnd, int major, int minor)
 {
-    return m_impl->Initialize(hwnd, _vmaj, _vmin);
+    m_hwnd = hwnd;
+    return m_impl->Initialize((HWND)hwnd, major, minor);
 }
 
-void GLContext::Present()
+void WGLContext::Present()
 {
+    ValidateRect((HWND)m_hwnd, 0); // suppress WM_PAINT
     m_impl->Present();
 }
