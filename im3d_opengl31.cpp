@@ -13,12 +13,87 @@
 #include <im3d.h>
 #include <im3d_math.h>
 
+const std::string g_points_vs =
+#include "im3d_points.vs"
+    ;
+const std::string g_points_fs =
+#include "im3d_points.fs"
+    ;
+
+const std::string g_lines_vs =
+#include "im3d_lines.vs"
+    ;
+const std::string g_lines_fs =
+#include "im3d_lines.fs"
+    ;
+
+const std::string g_triangles_vs =
+#include "im3d_triangles.vs"
+    ;
+const std::string g_triangles_fs =
+#include "im3d_triangles.fs"
+    ;
+
 static GLuint g_Im3dVertexArray;
 static GLuint g_Im3dVertexBuffer;
 static GLuint g_Im3dUniformBuffer;
 static GLuint g_Im3dShaderPoints;
 static GLuint g_Im3dShaderLines;
 static GLuint g_Im3dShaderTriangles;
+
+static GLuint CompileShader(GLenum stage, const std::string &src)
+{
+    auto shader = glCreateShader(stage);
+    auto data = static_cast<const GLchar *>(src.data());
+    auto size = static_cast<GLint>(src.size());
+    glShaderSource(shader, 1, &data, &size);
+
+    glCompileShader(shader);
+    auto compileStatus = GL_FALSE;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    if (compileStatus == GL_FALSE)
+    {
+        // fprintf(stderr, "Error compiling '%s':\n\n", _path);
+        GLint len;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+        char *log = new GLchar[len];
+        glGetShaderInfoLog(shader, len, 0, log);
+        fprintf(stderr, log);
+        delete[] log;
+
+        //fprintf(stderr, "\n\n%s", src.data());
+        fprintf(stderr, "\n");
+        glDeleteShader(shader);
+        return 0;
+    }
+    return shader;
+}
+
+unsigned int CreateShader(const std::string &vsSrc, const std::string &fsSrc)
+{
+    auto vs = CompileShader(GL_VERTEX_SHADER, vsSrc);
+    if (!vs)
+    {
+        return 0;
+    }
+    auto fs = CompileShader(GL_FRAGMENT_SHADER, fsSrc);
+    if (!fs)
+    {
+        return 0;
+    }
+
+    auto shTeapot = glCreateProgram();
+    glAttachShader(shTeapot, vs);
+    glAttachShader(shTeapot, fs);
+    bool ret = LinkShaderProgram(shTeapot);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    if (!ret)
+    {
+        return 0;
+    }
+    return shTeapot;
+}
 
 // Resource init/shutdown will be app specific. In general you'll need one shader for each of the 3
 // draw primitive types (points, lines, triangles), plus some number of vertex buffers.
@@ -27,6 +102,23 @@ bool Im3d_Init()
     // OpenGL uniform buffers require 16 byte alignment for structs - set IM3D_VERTEX_ALIGNMENT in im3d_config.h
     assert(sizeof(Im3d::VertexData) % 16 == 0);
 
+#if 1
+    {
+        g_Im3dShaderPoints = CreateShader(g_points_vs, g_points_fs);
+        auto blockIndex = glGetUniformBlockIndex(g_Im3dShaderPoints, "VertexDataBlock");
+        glUniformBlockBinding(g_Im3dShaderPoints, blockIndex, 0);
+    }
+    {
+        g_Im3dShaderLines = CreateShader(g_lines_vs, g_lines_fs);
+        auto blockIndex = glGetUniformBlockIndex(g_Im3dShaderLines, "VertexDataBlock");
+        glUniformBlockBinding(g_Im3dShaderLines, blockIndex, 0);
+    }
+    {
+        g_Im3dShaderTriangles = CreateShader(g_triangles_vs, g_triangles_fs);
+        auto blockIndex = glGetUniformBlockIndex(g_Im3dShaderTriangles, "VertexDataBlock");
+        glUniformBlockBinding(g_Im3dShaderTriangles, blockIndex, 0);
+    }
+#else
     {
         GLuint vs = LoadCompileShader(GL_VERTEX_SHADER, "im3d.glsl", "VERTEX_SHADER\0POINTS\0");
         GLuint fs = LoadCompileShader(GL_FRAGMENT_SHADER, "im3d.glsl", "FRAGMENT_SHADER\0POINTS\0");
@@ -99,6 +191,7 @@ bool Im3d_Init()
         blockIndex = glGetUniformBlockIndex(g_Im3dShaderTriangles, "VertexDataBlock");
         glUniformBlockBinding(g_Im3dShaderTriangles, blockIndex, 0);
     }
+#endif
 
     // in this example we're using a static buffer as the vertex source with a uniform buffer to provide
     // the shader with the Im3d vertex data
@@ -165,7 +258,7 @@ void Im3d_NewFrame(int x, int y, const camera::CameraState *c)
             c->viewInverse[1], c->viewInverse[5], c->viewInverse[9], c->viewInverse[13],
             c->viewInverse[2], c->viewInverse[6], c->viewInverse[10], c->viewInverse[14],
             c->viewInverse[3], c->viewInverse[7], c->viewInverse[11], c->viewInverse[15]);
-        
+
         rayDirection = camWorld * Im3d::Vec4(Im3d::Normalize(rayDirection), 0.0f);
     }
     ad.m_cursorRayOrigin = rayOrigin;
