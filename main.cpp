@@ -1,6 +1,6 @@
 #include "win32_window.h"
 #include "glcontext.h"
-#include "im3d_opengl31.h"
+#include "im3d_gui.h"
 #include "scene.h"
 #include "glutil.h"
 #include "orbit_camera.h"
@@ -21,10 +21,7 @@ int main(int, char **)
         return 2;
     }
 
-    if (!Im3d_Init())
-    {
-        return 4;
-    }
+    Im3dGui gui;
 
     Scene scene;
 
@@ -46,7 +43,7 @@ int main(int, char **)
         // reset state & clear backbuffer for next frame
         GLClearState(w, h);
 
-        Im3d_NewFrame(mouse.X, mouse.Y, &camera.state);
+        gui.NewFrame(&camera.state, &mouse, 0);
 
         // The ID passed to Gizmo() should be unique during a frame - to create gizmos in a loop use PushId()/PopId().
         Im3d::Gizmo("GizmoUnified", transform);
@@ -56,13 +53,12 @@ int main(int, char **)
         scene.DrawTeapot(camera.state.viewProjection.data(), transform);
 
         // draw
-        Im3d_EndFrame(w, h, camera.state.viewProjection.data());
+        gui.Draw(camera.state.viewProjection.data(), w, h);
 
         ValidateRect((HWND)window.GetHandle(), 0); // suppress WM_PAINT
 
         glcontext.Present();
     }
-    Im3d_Shutdown();
 
     return 0;
 }
