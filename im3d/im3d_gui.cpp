@@ -15,7 +15,6 @@ public:
     Im3dGui();
     ~Im3dGui();
     void NewFrame(const camera::CameraState *camera, const MouseState *mouse, float deltaTime);
-    void Manipulate(float world[16]);
     void Draw(const float *viewProjection, int w, int h);
 };
 
@@ -302,11 +301,6 @@ void Im3dGui::NewFrame(const camera::CameraState *c, const MouseState *mouse, fl
     Im3d::NewFrame();
 }
 
-void Im3dGui::Manipulate(float world[16])
-{
-    Im3d::Gizmo("GizmoUnified", world);
-}
-
 void Im3dGui::Draw(const float *viewProjection, int w, int h)
 {
     m_impl->Draw(viewProjection, w, h);
@@ -334,11 +328,6 @@ void Im3dGui_Finalize()
 void Im3dGui_NewFrame(const camera::CameraState *camera, const MouseState *mouse, float deltaTime)
 {
     g_gui->NewFrame(camera, mouse, deltaTime);
-}
-
-void Im3dGui_Manipulate(float world[16])
-{
-    g_gui->Manipulate(world);
 }
 
 void Im3dGui_EndFrame()

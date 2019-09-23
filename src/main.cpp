@@ -1,5 +1,6 @@
 #include "win32_window.h"
 #include <im3d_gui.h>
+#include <im3d.h>
 #include "orbit_camera.h"
 #include <gl3_renderer.h>
 
@@ -54,7 +55,7 @@ int main(int, char **)
         camera.state.CalcViewProjection();
 
         Im3dGui_NewFrame(&camera.state, &mouse, 0);
-        Im3dGui_Manipulate(transform.data());
+        Im3d::Gizmo("GizmoUnified", transform.data());
         Im3dGui_EndFrame();
 
         GL3_NewFrame(w, h);
