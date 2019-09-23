@@ -2,6 +2,12 @@
 #ifndef im3d_config_h
 #define im3d_config_h
 
+#if im3d_EXPORTS
+#define IM3D_EXPORT __declspec(dllexport)
+#else
+#define IM3D_EXPORT __declspec(dllimport)
+#endif
+
 // User-defined assertion handler (default is cassert assert()).
 //#define IM3D_ASSERT(e) assert(e)
 

@@ -187,6 +187,54 @@ Im3dGui::~Im3dGui()
     delete m_impl;
 }
 
+namespace Im3d{
+static void AppData_setCullFrustum(AppData *ad, const Mat4& _viewProj, bool _ndcZNegativeOneToOne)
+{
+	ad->m_cullFrustum[FrustumPlane_Top].x    = _viewProj(3, 0) - _viewProj(1, 0);
+	ad->m_cullFrustum[FrustumPlane_Top].y    = _viewProj(3, 1) - _viewProj(1, 1);
+	ad->m_cullFrustum[FrustumPlane_Top].z    = _viewProj(3, 2) - _viewProj(1, 2);
+	ad->m_cullFrustum[FrustumPlane_Top].w    = -(_viewProj(3, 3) - _viewProj(1, 3));
+
+	ad->m_cullFrustum[FrustumPlane_Bottom].x = _viewProj(3, 0) + _viewProj(1, 0);
+	ad->m_cullFrustum[FrustumPlane_Bottom].y = _viewProj(3, 1) + _viewProj(1, 1);
+	ad->m_cullFrustum[FrustumPlane_Bottom].z = _viewProj(3, 2) + _viewProj(1, 2);
+	ad->m_cullFrustum[FrustumPlane_Bottom].w = -(_viewProj(3, 3) + _viewProj(1, 3));
+
+	ad->m_cullFrustum[FrustumPlane_Right].x  = _viewProj(3, 0) - _viewProj(0, 0);
+	ad->m_cullFrustum[FrustumPlane_Right].y  = _viewProj(3, 1) - _viewProj(0, 1);
+	ad->m_cullFrustum[FrustumPlane_Right].z  = _viewProj(3, 2) - _viewProj(0, 2);
+	ad->m_cullFrustum[FrustumPlane_Right].w  = -(_viewProj(3, 3) - _viewProj(0, 3));
+
+	ad->m_cullFrustum[FrustumPlane_Left].x   = _viewProj(3, 0) + _viewProj(0, 0);
+	ad->m_cullFrustum[FrustumPlane_Left].y   = _viewProj(3, 1) + _viewProj(0, 1);
+	ad->m_cullFrustum[FrustumPlane_Left].z   = _viewProj(3, 2) + _viewProj(0, 2);
+	ad->m_cullFrustum[FrustumPlane_Left].w   = -(_viewProj(3, 3) + _viewProj(0, 3));
+
+	ad->m_cullFrustum[FrustumPlane_Far].x    = _viewProj(3, 0) - _viewProj(2, 0);
+	ad->m_cullFrustum[FrustumPlane_Far].y    = _viewProj(3, 1) - _viewProj(2, 1);
+	ad->m_cullFrustum[FrustumPlane_Far].z    = _viewProj(3, 2) - _viewProj(2, 2);
+	ad->m_cullFrustum[FrustumPlane_Far].w    = -(_viewProj(3, 3) - _viewProj(2, 3));
+
+	if (_ndcZNegativeOneToOne) {
+		ad->m_cullFrustum[FrustumPlane_Near].x = _viewProj(3, 0) + _viewProj(2, 0);
+		ad->m_cullFrustum[FrustumPlane_Near].y = _viewProj(3, 1) + _viewProj(2, 1);
+		ad->m_cullFrustum[FrustumPlane_Near].z = _viewProj(3, 2) + _viewProj(2, 2);
+		ad->m_cullFrustum[FrustumPlane_Near].w = -(_viewProj(3, 3) + _viewProj(2, 3));
+	} else {
+		ad->m_cullFrustum[FrustumPlane_Near].x = _viewProj(2, 0);
+		ad->m_cullFrustum[FrustumPlane_Near].y = _viewProj(2, 1);
+		ad->m_cullFrustum[FrustumPlane_Near].z = _viewProj(2, 2);
+		ad->m_cullFrustum[FrustumPlane_Near].w = -(_viewProj(2, 3));
+	}
+
+ // normalize
+	for (int i = 0; i < FrustumPlane_Count; ++i) {
+		float d = 1.0f / Length(Vec3(ad->m_cullFrustum[i]));
+		ad->m_cullFrustum[i] = ad->m_cullFrustum[i] * d;
+	}
+}
+}
+
 void Im3dGui::NewFrame(const camera::CameraState *c, const MouseState *mouse, float deltaTime)
 {
     auto &ad = Im3d::GetAppData();
@@ -229,7 +277,8 @@ void Im3dGui::NewFrame(const camera::CameraState *c, const MouseState *mouse, fl
         c->viewProjection[4], c->viewProjection[5], c->viewProjection[6], c->viewProjection[7],
         c->viewProjection[8], c->viewProjection[9], c->viewProjection[10], c->viewProjection[11],
         c->viewProjection[12], c->viewProjection[13], c->viewProjection[14], c->viewProjection[15]);
-    ad.setCullFrustum(viewProj, true);
+    // ad.setCullFrustum(viewProj, true);
+    Im3d::AppData_setCullFrustum(&ad, viewProj, true);
 
     // Fill the key state array; using GetAsyncKeyState here but this could equally well be done via the window proc.
     // All key states have an equivalent (and more descriptive) 'Action_' enum.

@@ -2305,14 +2305,6 @@ U32 Context::getPrimitiveCount(DrawPrimitiveType _type) const
 
 ******************************************************************************/
 
-// Vec3
-Vec3::Vec3(const Vec4& _v)
-	: x(_v.x)
-	, y(_v.y)
-	, z(_v.z)
-{
-}
-
 // Vec4
 Vec4::Vec4(Color _rgba)
 	: x(_rgba.getR())
@@ -2454,18 +2446,7 @@ Mat4::Mat4(float _diagonal)
 	(*this)(2, 0) = 0.0f;      (*this)(2, 1) = 0.0f;      (*this)(2, 2) = _diagonal; (*this)(2, 3) = 0.0f;
 	(*this)(3, 0) = 0.0f;      (*this)(3, 1) = 0.0f;      (*this)(3, 2) = 0.0f;      (*this)(3, 3) = _diagonal;
 }
-Mat4::Mat4(
-	float m00, float m01, float m02, float m03,
-	float m10, float m11, float m12, float m13,
-	float m20, float m21, float m22, float m23,
-	float m30, float m31, float m32, float m33
-	)
-{
-	(*this)(0, 0) = m00; (*this)(0, 1) = m01; (*this)(0, 2) = m02; (*this)(0, 3) = m03;
-	(*this)(1, 0) = m10; (*this)(1, 1) = m11; (*this)(1, 2) = m12; (*this)(1, 3) = m13;
-	(*this)(2, 0) = m20; (*this)(2, 1) = m21; (*this)(2, 2) = m22; (*this)(2, 3) = m23;
-	(*this)(3, 0) = m30; (*this)(3, 1) = m31; (*this)(3, 2) = m32; (*this)(3, 3) = m33;
-}
+
 Mat4::Mat4(const Mat3& _mat3)
 {
 	(*this)(0, 0) = _mat3(0, 0); (*this)(0, 1) = _mat3(0, 1); (*this)(0, 2) = _mat3(0, 2); (*this)(0, 3) = 0.0f;

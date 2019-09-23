@@ -33,156 +33,156 @@ typedef U32 Id;
 constexpr Id Id_Invalid = 0;
 
 // Get AppData struct from the current context, fill before calling NewFrame().
-AppData& GetAppData();
+IM3D_EXPORT AppData& GetAppData();
 
 // Call at the start of each frame, after filling the AppData struct.
-void  NewFrame();
+IM3D_EXPORT void  NewFrame();
 // Call after all Im3d calls have been made for the current frame, before accessing draw data.
-void  EndFrame();
+IM3D_EXPORT void  EndFrame();
 
 // Access draw data. Draw lists are valid after calling EndFrame() and before calling NewFrame().
-const DrawList* GetDrawLists();
-U32   GetDrawListCount();
+IM3D_EXPORT const DrawList* GetDrawLists();
+IM3D_EXPORT U32   GetDrawListCount();
 
 // DEPRECATED (use EndFrame() + GetDrawLists()).
 // Call after all Im3d calls have been made for the current frame.
-void  Draw();
+IM3D_EXPORT void  Draw();
 
 
 // Begin/end primitive. End() must be called before starting each new primitive type.
-void  BeginPoints();
-void  BeginLines();
-void  BeginLineLoop();
-void  BeginLineStrip();
-void  BeginTriangles();
-void  BeginTriangleStrip();
-void  End();
+IM3D_EXPORT void  BeginPoints();
+IM3D_EXPORT void  BeginLines();
+IM3D_EXPORT void  BeginLineLoop();
+IM3D_EXPORT void  BeginLineStrip();
+IM3D_EXPORT void  BeginTriangles();
+IM3D_EXPORT void  BeginTriangleStrip();
+IM3D_EXPORT void  End();
 
 // Add a vertex to the current primitive (call between Begin*() and End()).
-void  Vertex(const Vec3& _position);
-void  Vertex(const Vec3& _position, Color _color);
-void  Vertex(const Vec3& _position, float _size);
-void  Vertex(const Vec3& _position, float _size, Color _color);
-void  Vertex(float _x, float _y, float _z);
-void  Vertex(float _x, float _y, float _z, Color _color);
-void  Vertex(float _x, float _y, float _z, float _size);
-void  Vertex(float _x, float _y, float _z, float _size, Color _color);
+IM3D_EXPORT void  Vertex(const Vec3& _position);
+IM3D_EXPORT void  Vertex(const Vec3& _position, Color _color);
+IM3D_EXPORT void  Vertex(const Vec3& _position, float _size);
+IM3D_EXPORT void  Vertex(const Vec3& _position, float _size, Color _color);
+IM3D_EXPORT void  Vertex(float _x, float _y, float _z);
+IM3D_EXPORT void  Vertex(float _x, float _y, float _z, Color _color);
+IM3D_EXPORT void  Vertex(float _x, float _y, float _z, float _size);
+IM3D_EXPORT void  Vertex(float _x, float _y, float _z, float _size, Color _color);
 
 // Color draw state (per vertex).
-void  PushColor(); // push the stack top
-void  PushColor(Color _color);
-void  PopColor();
-void  SetColor(Color _color);
-void  SetColor(float _r, float _g, float _b, float _a = 1.0f);
-Color GetColor();
+IM3D_EXPORT void  PushColor(); // push the stack top
+IM3D_EXPORT void  PushColor(Color _color);
+IM3D_EXPORT void  PopColor();
+IM3D_EXPORT void  SetColor(Color _color);
+IM3D_EXPORT void  SetColor(float _r, float _g, float _b, float _a = 1.0f);
+IM3D_EXPORT Color GetColor();
 
 // Alpha draw state, multiplies the alpha set by the color draw state (per vertex).
-void  PushAlpha(); // push the stack top
-void  PushAlpha(float _alpha);
-void  PopAlpha();
-void  SetAlpha(float _alpha);
-float GetAlpha();
+IM3D_EXPORT void  PushAlpha(); // push the stack top
+IM3D_EXPORT void  PushAlpha(float _alpha);
+IM3D_EXPORT void  PopAlpha();
+IM3D_EXPORT void  SetAlpha(float _alpha);
+IM3D_EXPORT float GetAlpha();
 
 // Size draw state, for points/lines this is the radius/width in pixels (per vertex).
-void  PushSize(); // push the stack top
-void  PushSize(float _size);
-void  PopSize();
-void  SetSize(float _size);
-float GetSize();
+IM3D_EXPORT void  PushSize(); // push the stack top
+IM3D_EXPORT void  PushSize(float _size);
+IM3D_EXPORT void  PopSize();
+IM3D_EXPORT void  SetSize(float _size);
+IM3D_EXPORT float GetSize();
 
 // Sorting draw state, enable depth sorting between primitives (per primitive).
-void  PushEnableSorting(); // push the stack top
-void  PushEnableSorting(bool _enable);
-void  PopEnableSorting();
-void  EnableSorting(bool _enable);
+IM3D_EXPORT void  PushEnableSorting(); // push the stack top
+IM3D_EXPORT void  PushEnableSorting(bool _enable);
+IM3D_EXPORT void  PopEnableSorting();
+IM3D_EXPORT void  EnableSorting(bool _enable);
 
 // Push/pop all draw states (color, alpha, size, sorting).
-void  PushDrawState();
-void  PopDrawState();
+IM3D_EXPORT void  PushDrawState();
+IM3D_EXPORT void  PopDrawState();
 
 // Transform state (per vertex).
-void  PushMatrix(); // push stack top
-void  PushMatrix(const Mat4& _mat4);
-void  PopMatrix();
-void  SetMatrix(const Mat4& _mat4);
-void  SetIdentity();
-void  MulMatrix(const Mat4& _mat4);
-void  Translate(float _x, float _y, float _z);
-void  Translate(const Vec3& _vec3);
-void  Rotate(const Vec3& _axis, float _angle);
-void  Rotate(const Mat3& _rotation);
-void  Scale(float _x, float _y, float _z);
+IM3D_EXPORT void  PushMatrix(); // push stack top
+IM3D_EXPORT void  PushMatrix(const Mat4& _mat4);
+IM3D_EXPORT void  PopMatrix();
+IM3D_EXPORT void  SetMatrix(const Mat4& _mat4);
+IM3D_EXPORT void  SetIdentity();
+IM3D_EXPORT void  MulMatrix(const Mat4& _mat4);
+IM3D_EXPORT void  Translate(float _x, float _y, float _z);
+IM3D_EXPORT void  Translate(const Vec3& _vec3);
+IM3D_EXPORT void  Rotate(const Vec3& _axis, float _angle);
+IM3D_EXPORT void  Rotate(const Mat3& _rotation);
+IM3D_EXPORT void  Scale(float _x, float _y, float _z);
 
 // High order shapes. Where _detail = -1, an automatic level of detail is chosen based on the distance to the view origin (as specified via the AppData struct).
-void  DrawXyzAxes();
-void  DrawPoint(const Vec3& _position, float _size, Color _color);
-void  DrawLine(const Vec3& _a, const Vec3& _b, float _size, Color _color);
-void  DrawQuad(const Vec3& _a, const Vec3& _b, const Vec3& _c, const Vec3& _d);
-void  DrawQuad(const Vec3& _origin, const Vec3& _normal, const Vec2& _size);
-void  DrawQuadFilled(const Vec3& _a, const Vec3& _b, const Vec3& _c, const Vec3& _d);
-void  DrawQuadFilled(const Vec3& _origin, const Vec3& _normal, const Vec2& _size);
-void  DrawCircle(const Vec3& _origin, const Vec3& _normal, float _radius, int _detail = -1);
-void  DrawCircleFilled(const Vec3& _origin, const Vec3& _normal, float _radius, int _detail = -1);
-void  DrawSphere(const Vec3& _origin, float _radius, int _detail = -1);
-void  DrawSphereFilled(const Vec3& _origin, float _radius, int _detail = -1);
-void  DrawAlignedBox(const Vec3& _min, const Vec3& _max);
-void  DrawAlignedBoxFilled(const Vec3& _min, const Vec3& _max);
-void  DrawCylinder(const Vec3& _start, const Vec3& _end, float _radius, int _detail = -1);
-void  DrawCapsule(const Vec3& _start, const Vec3& _end, float _radius, int _detail = -1);
-void  DrawPrism(const Vec3& _start, const Vec3& _end, float _radius, int _sides);
-void  DrawArrow(const Vec3& _start, const Vec3& _end, float _headLength = -1.0f, float _headThickness = -1.0f);
+IM3D_EXPORT void  DrawXyzAxes();
+IM3D_EXPORT void  DrawPoint(const Vec3& _position, float _size, Color _color);
+IM3D_EXPORT void  DrawLine(const Vec3& _a, const Vec3& _b, float _size, Color _color);
+IM3D_EXPORT void  DrawQuad(const Vec3& _a, const Vec3& _b, const Vec3& _c, const Vec3& _d);
+IM3D_EXPORT void  DrawQuad(const Vec3& _origin, const Vec3& _normal, const Vec2& _size);
+IM3D_EXPORT void  DrawQuadFilled(const Vec3& _a, const Vec3& _b, const Vec3& _c, const Vec3& _d);
+IM3D_EXPORT void  DrawQuadFilled(const Vec3& _origin, const Vec3& _normal, const Vec2& _size);
+IM3D_EXPORT void  DrawCircle(const Vec3& _origin, const Vec3& _normal, float _radius, int _detail = -1);
+IM3D_EXPORT void  DrawCircleFilled(const Vec3& _origin, const Vec3& _normal, float _radius, int _detail = -1);
+IM3D_EXPORT void  DrawSphere(const Vec3& _origin, float _radius, int _detail = -1);
+IM3D_EXPORT void  DrawSphereFilled(const Vec3& _origin, float _radius, int _detail = -1);
+IM3D_EXPORT void  DrawAlignedBox(const Vec3& _min, const Vec3& _max);
+IM3D_EXPORT void  DrawAlignedBoxFilled(const Vec3& _min, const Vec3& _max);
+IM3D_EXPORT void  DrawCylinder(const Vec3& _start, const Vec3& _end, float _radius, int _detail = -1);
+IM3D_EXPORT void  DrawCapsule(const Vec3& _start, const Vec3& _end, float _radius, int _detail = -1);
+IM3D_EXPORT void  DrawPrism(const Vec3& _start, const Vec3& _end, float _radius, int _sides);
+IM3D_EXPORT void  DrawArrow(const Vec3& _start, const Vec3& _end, float _headLength = -1.0f, float _headThickness = -1.0f);
 
 // Ids are used to uniquely identify gizmos and layers. Gizmo should have a unique id during a frame.
 // Note that ids are a hash of the whole id stack, see PushId(), PopId().
-Id    MakeId(const char* _str);
-Id    MakeId(const void* _ptr);
-Id    MakeId(int _i);
+IM3D_EXPORT Id    MakeId(const char* _str);
+IM3D_EXPORT Id    MakeId(const void* _ptr);
+IM3D_EXPORT Id    MakeId(int _i);
 
 // PushId(), PopId() affect the result of subsequent calls to MakeId(), use when creating gizmos in a loop.
-void  PushId(); // push stack top
-void  PushId(Id _id);
-void  PushId(const char* _str);
-void  PushId(const void* _ptr);
-void  PushId(int _i);
-void  PopId();
-Id    GetId();
-Id    GetActiveId(); // GetActiveId() != Id_Invalid means that a gizmo is in use
-Id    GetHotId();
+IM3D_EXPORT void  PushId(); // push stack top
+IM3D_EXPORT void  PushId(Id _id);
+IM3D_EXPORT void  PushId(const char* _str);
+IM3D_EXPORT void  PushId(const void* _ptr);
+IM3D_EXPORT void  PushId(int _i);
+IM3D_EXPORT void  PopId();
+IM3D_EXPORT Id    GetId();
+IM3D_EXPORT Id    GetActiveId(); // GetActiveId() != Id_Invalid means that a gizmo is in use
+IM3D_EXPORT Id    GetHotId();
 
 // Layer id state, subsequent primitives are added to a separate draw list associated with the id (per primitive).
-void  PushLayerId(Id _layer);
-void  PushLayerId(const char* _str); // calls PushLayerId(MakeId(_str))
-void  PopLayerId();
-Id    GetLayerId();
+IM3D_EXPORT void  PushLayerId(Id _layer);
+IM3D_EXPORT void  PushLayerId(const char* _str); // calls PushLayerId(MakeId(_str))
+IM3D_EXPORT void  PopLayerId();
+IM3D_EXPORT Id    GetLayerId();
 
 
 // Manipulate translation/rotation/scale via a gizmo. Return true if the gizmo is 'active' (if it modified the output parameter).
 // If _local is true, the Gizmo* functions expect that the local matrix is on the matrix stack; in general the application should
 // push the local matrix before calling any of the following.
-bool  GizmoTranslation(const char* _id, float _translation_[3], bool _local = false);
-bool  GizmoRotation(const char* _id, float _rotation_[3*3], bool _local = false);
-bool  GizmoScale(const char* _id, float _scale_[3]); // local scale only
+IM3D_EXPORT bool  GizmoTranslation(const char* _id, float _translation_[3], bool _local = false);
+IM3D_EXPORT bool  GizmoRotation(const char* _id, float _rotation_[3*3], bool _local = false);
+IM3D_EXPORT bool  GizmoScale(const char* _id, float _scale_[3]); // local scale only
 // Unified gizmo, selects local/global, translation/rotation/scale based on the context-global gizmo modes. Return true if the gizmo is active.
-bool  Gizmo(const char* _id, float _translation_[3], float _rotation_[3*3], float _scale_[3]); // any of _translation_/_rotation_/_scale_ may be null.
-bool  Gizmo(const char* _id, float _transform_[4*4]);
+IM3D_EXPORT bool  Gizmo(const char* _id, float _translation_[3], float _rotation_[3*3], float _scale_[3]); // any of _translation_/_rotation_/_scale_ may be null.
+IM3D_EXPORT bool  Gizmo(const char* _id, float _transform_[4*4]);
 
 // Gizmo* overloads which take an Id directly. In some cases the app may want to call MakeId() separately, usually to change the gizmo appearance if hot/active.
-bool  GizmoTranslation(Id _id, float _translation_[3], bool _local = false);
-bool  GizmoRotation(Id _id, float _rotation_[3*3], bool _local = false);
-bool  GizmoScale(Id _id, float _scale_[3]);
-bool  Gizmo(Id _id, float _transform_[4*4]);
-bool  Gizmo(Id _id, float _translation_[3], float _rotation_[3*3], float _scale_[3]);
+IM3D_EXPORT bool  GizmoTranslation(Id _id, float _translation_[3], bool _local = false);
+IM3D_EXPORT bool  GizmoRotation(Id _id, float _rotation_[3*3], bool _local = false);
+IM3D_EXPORT bool  GizmoScale(Id _id, float _scale_[3]);
+IM3D_EXPORT bool  Gizmo(Id _id, float _transform_[4*4]);
+IM3D_EXPORT bool  Gizmo(Id _id, float _translation_[3], float _rotation_[3*3], float _scale_[3]);
 
 // Visibility tests. The application must set a culling frustum via AppData.
-bool  IsVisible(const Vec3& _origin, float _radius); // sphere
-bool  IsVisible(const Vec3& _min, const Vec3& _max); // axis-aligned bounding box
+IM3D_EXPORT bool  IsVisible(const Vec3& _origin, float _radius); // sphere
+IM3D_EXPORT bool  IsVisible(const Vec3& _min, const Vec3& _max); // axis-aligned bounding box
 
 // Get/set the current context. All Im3d calls affect the currently bound context.
-Context& GetContext();
-void     SetContext(Context& _ctx);
+IM3D_EXPORT Context& GetContext();
+IM3D_EXPORT void     SetContext(Context& _ctx);
 
 // Merge vertex data from _src into _dst_. Layers are preserved. Call before EndFrame().
-void     MergeContexts(Context& _dst_, const Context& _src);
+IM3D_EXPORT void     MergeContexts(Context& _dst_, const Context& _src);
 
 struct Vec2
 {
@@ -224,6 +224,13 @@ struct Vec4
 		IM3D_VEC4_APP
 	#endif
 };
+// Vec3
+Vec3::Vec3(const Vec4& _v)
+	: x(_v.x)
+	, y(_v.y)
+	, z(_v.z)
+{
+}
 struct Mat3
 {
 	float m[3*3]; // column-major unless IM3D_MATRIX_ROW_MAJOR defined
@@ -321,6 +328,18 @@ struct Mat4
 		IM3D_MAT4_APP
 	#endif
 };
+Mat4::Mat4(
+	float m00, float m01, float m02, float m03,
+	float m10, float m11, float m12, float m13,
+	float m20, float m21, float m22, float m23,
+	float m30, float m31, float m32, float m33
+	)
+{
+	(*this)(0, 0) = m00; (*this)(0, 1) = m01; (*this)(0, 2) = m02; (*this)(0, 3) = m03;
+	(*this)(1, 0) = m10; (*this)(1, 1) = m11; (*this)(1, 2) = m12; (*this)(1, 3) = m13;
+	(*this)(2, 0) = m20; (*this)(2, 1) = m21; (*this)(2, 2) = m22; (*this)(2, 3) = m23;
+	(*this)(3, 0) = m30; (*this)(3, 1) = m31; (*this)(3, 2) = m32; (*this)(3, 3) = m33;
+}
 struct Color
 {
 	U32 v; // rgba8 (MSB = r)
@@ -390,7 +409,7 @@ struct DrawList
 	const VertexData* m_vertexData;
 	U32               m_vertexCount;
 };
-typedef void (DrawPrimitivesCallback)(const DrawList& _drawList);
+IM3D_EXPORT typedef void (DrawPrimitivesCallback)(const DrawList& _drawList);
 
 enum Key
 {
@@ -681,93 +700,93 @@ namespace internal {
 	extern IM3D_THREAD_LOCAL Context* g_CurrentContext;
 }
 
-inline AppData& GetAppData()                                                 { return GetContext().getAppData();   }
-inline void     NewFrame()                                                   { GetContext().reset();               }
-inline void     EndFrame()                                                   { GetContext().endFrame();            }
-inline void     Draw()                                                       { GetContext().draw();                }
+IM3D_EXPORT inline AppData& GetAppData()                                                 { return GetContext().getAppData();   }
+IM3D_EXPORT inline void     NewFrame()                                                   { GetContext().reset();               }
+IM3D_EXPORT inline void     EndFrame()                                                   { GetContext().endFrame();            }
+IM3D_EXPORT inline void     Draw()                                                       { GetContext().draw();                }
 
-inline const DrawList* GetDrawLists()                                        { return GetContext().getDrawLists();     }
-inline U32             GetDrawListCount()                                    { return GetContext().getDrawListCount(); }
+IM3D_EXPORT inline const DrawList* GetDrawLists()                                        { return GetContext().getDrawLists();     }
+IM3D_EXPORT inline U32             GetDrawListCount()                                    { return GetContext().getDrawListCount(); }
 
-inline void  BeginPoints()                                                   { GetContext().begin(PrimitiveMode_Points);        }
-inline void  BeginLines()                                                    { GetContext().begin(PrimitiveMode_Lines);         }
-inline void  BeginLineLoop()                                                 { GetContext().begin(PrimitiveMode_LineLoop);      }
-inline void  BeginLineStrip()                                                { GetContext().begin(PrimitiveMode_LineStrip);     }
-inline void  BeginTriangles()                                                { GetContext().begin(PrimitiveMode_Triangles);     }
-inline void  BeginTriangleStrip()                                            { GetContext().begin(PrimitiveMode_TriangleStrip); }
-inline void  End()                                                           { GetContext().end(); }
+IM3D_EXPORT inline void  BeginPoints()                                                   { GetContext().begin(PrimitiveMode_Points);        }
+IM3D_EXPORT inline void  BeginLines()                                                    { GetContext().begin(PrimitiveMode_Lines);         }
+IM3D_EXPORT inline void  BeginLineLoop()                                                 { GetContext().begin(PrimitiveMode_LineLoop);      }
+IM3D_EXPORT inline void  BeginLineStrip()                                                { GetContext().begin(PrimitiveMode_LineStrip);     }
+IM3D_EXPORT inline void  BeginTriangles()                                                { GetContext().begin(PrimitiveMode_Triangles);     }
+IM3D_EXPORT inline void  BeginTriangleStrip()                                            { GetContext().begin(PrimitiveMode_TriangleStrip); }
+IM3D_EXPORT inline void  End()                                                           { GetContext().end(); }
 
-inline void  Vertex(const Vec3& _position)                                   { GetContext().vertex(_position, GetContext().getSize(), GetContext().getColor()); }
-inline void  Vertex(const Vec3& _position, Color _color)                     { GetContext().vertex(_position, GetContext().getSize(), _color); }
-inline void  Vertex(const Vec3& _position, float _size)                      { GetContext().vertex(_position, _size, GetContext().getColor()); }
-inline void  Vertex(const Vec3& _position, float _size, Color _color)        { GetContext().vertex(_position, _size, _color); }
-inline void  Vertex(float _x, float _y, float _z)                            { Vertex(Vec3(_x, _y, _z)); }
-inline void  Vertex(float _x, float _y, float _z, Color _color)              { Vertex(Vec3(_x, _y, _z), _color); }
-inline void  Vertex(float _x, float _y, float _z, float _size)               { Vertex(Vec3(_x, _y, _z), _size); }
-inline void  Vertex(float _x, float _y, float _z, float _size, Color _color) { Vertex(Vec3(_x, _y, _z), _size, _color); }
+IM3D_EXPORT inline void  Vertex(const Vec3& _position)                                   { GetContext().vertex(_position, GetContext().getSize(), GetContext().getColor()); }
+IM3D_EXPORT inline void  Vertex(const Vec3& _position, Color _color)                     { GetContext().vertex(_position, GetContext().getSize(), _color); }
+IM3D_EXPORT inline void  Vertex(const Vec3& _position, float _size)                      { GetContext().vertex(_position, _size, GetContext().getColor()); }
+IM3D_EXPORT inline void  Vertex(const Vec3& _position, float _size, Color _color)        { GetContext().vertex(_position, _size, _color); }
+IM3D_EXPORT inline void  Vertex(float _x, float _y, float _z)                            { Vertex(Vec3(_x, _y, _z)); }
+IM3D_EXPORT inline void  Vertex(float _x, float _y, float _z, Color _color)              { Vertex(Vec3(_x, _y, _z), _color); }
+IM3D_EXPORT inline void  Vertex(float _x, float _y, float _z, float _size)               { Vertex(Vec3(_x, _y, _z), _size); }
+IM3D_EXPORT inline void  Vertex(float _x, float _y, float _z, float _size, Color _color) { Vertex(Vec3(_x, _y, _z), _size, _color); }
 
-inline void  PushDrawState()                                                 { Context& ctx = GetContext(); ctx.pushColor(ctx.getColor()); ctx.pushAlpha(ctx.getAlpha()); ctx.pushSize(ctx.getSize()); ctx.pushEnableSorting(ctx.getEnableSorting()); }
-inline void  PopDrawState()                                                  { Context& ctx = GetContext(); ctx.popColor(); ctx.popAlpha(); ctx.popSize(); ctx.popEnableSorting(); }
+IM3D_EXPORT inline void  PushDrawState()                                                 { Context& ctx = GetContext(); ctx.pushColor(ctx.getColor()); ctx.pushAlpha(ctx.getAlpha()); ctx.pushSize(ctx.getSize()); ctx.pushEnableSorting(ctx.getEnableSorting()); }
+IM3D_EXPORT inline void  PopDrawState()                                                  { Context& ctx = GetContext(); ctx.popColor(); ctx.popAlpha(); ctx.popSize(); ctx.popEnableSorting(); }
 
-inline void  PushColor()                                                     { GetContext().pushColor(GetContext().getColor()); }
-inline void  PushColor(Color _color)                                         { GetContext().pushColor(_color);                  }
-inline void  PopColor()                                                      { GetContext().popColor();                         }
-inline void  SetColor(Color _color)                                          { GetContext().setColor(_color);                   }
-inline void  SetColor(float _r, float _g, float _b, float _a)                { GetContext().setColor(Color(_r, _g, _b, _a));    }
-inline Color GetColor()                                                      { return GetContext().getColor();                  }
+IM3D_EXPORT inline void  PushColor()                                                     { GetContext().pushColor(GetContext().getColor()); }
+IM3D_EXPORT inline void  PushColor(Color _color)                                         { GetContext().pushColor(_color);                  }
+IM3D_EXPORT inline void  PopColor()                                                      { GetContext().popColor();                         }
+IM3D_EXPORT inline void  SetColor(Color _color)                                          { GetContext().setColor(_color);                   }
+IM3D_EXPORT inline void  SetColor(float _r, float _g, float _b, float _a)                { GetContext().setColor(Color(_r, _g, _b, _a));    }
+IM3D_EXPORT inline Color GetColor()                                                      { return GetContext().getColor();                  }
 
-inline void  PushAlpha()                                                     { GetContext().pushAlpha(GetContext().getAlpha()); }
-inline void  PushAlpha(float _alpha)                                         { GetContext().pushAlpha(_alpha);                  }
-inline void  PopAlpha()                                                      { GetContext().popAlpha();                         }
-inline void  SetAlpha(float _alpha)                                          { GetContext().setAlpha(_alpha);                   }
-inline float GetAlpha()                                                      { return GetContext().getAlpha();                  }
+IM3D_EXPORT inline void  PushAlpha()                                                     { GetContext().pushAlpha(GetContext().getAlpha()); }
+IM3D_EXPORT inline void  PushAlpha(float _alpha)                                         { GetContext().pushAlpha(_alpha);                  }
+IM3D_EXPORT inline void  PopAlpha()                                                      { GetContext().popAlpha();                         }
+IM3D_EXPORT inline void  SetAlpha(float _alpha)                                          { GetContext().setAlpha(_alpha);                   }
+IM3D_EXPORT inline float GetAlpha()                                                      { return GetContext().getAlpha();                  }
 
-inline void  PushSize()                                                      { GetContext().pushSize(GetContext().getAlpha());  }
-inline void  PushSize(float _size)                                           { GetContext().pushSize(_size);                    }
-inline void  PopSize()                                                       { GetContext().popSize();                          }
-inline void  SetSize(float _size)                                            { GetContext().setSize(_size);                     }
-inline float GetSize()                                                       { return GetContext().getSize();                   }
+IM3D_EXPORT inline void  PushSize()                                                      { GetContext().pushSize(GetContext().getAlpha());  }
+IM3D_EXPORT inline void  PushSize(float _size)                                           { GetContext().pushSize(_size);                    }
+IM3D_EXPORT inline void  PopSize()                                                       { GetContext().popSize();                          }
+IM3D_EXPORT inline void  SetSize(float _size)                                            { GetContext().setSize(_size);                     }
+IM3D_EXPORT inline float GetSize()                                                       { return GetContext().getSize();                   }
 
-inline void  PushEnableSorting()                                             { GetContext().pushEnableSorting(GetContext().getEnableSorting()); }
-inline void  PushEnableSorting(bool _enable)                                 { GetContext().pushEnableSorting(_enable); }
-inline void  PopEnableSorting()                                              { GetContext().popEnableSorting();         }
-inline void  EnableSorting(bool _enable)                                     { GetContext().setEnableSorting(_enable);  }
+IM3D_EXPORT inline void  PushEnableSorting()                                             { GetContext().pushEnableSorting(GetContext().getEnableSorting()); }
+IM3D_EXPORT inline void  PushEnableSorting(bool _enable)                                 { GetContext().pushEnableSorting(_enable); }
+IM3D_EXPORT inline void  PopEnableSorting()                                              { GetContext().popEnableSorting();         }
+IM3D_EXPORT inline void  EnableSorting(bool _enable)                                     { GetContext().setEnableSorting(_enable);  }
 
-inline void  PushMatrix()                                                    { GetContext().pushMatrix(GetContext().getMatrix()); }
-inline void  PushMatrix(const Mat4& _mat4)                                   { GetContext().pushMatrix(_mat4);                    }
-inline void  PopMatrix()                                                     { GetContext().popMatrix();                          }
-inline void  SetMatrix(const Mat4& _mat4)                                    { GetContext().setMatrix(_mat4);                     }
-inline void  SetIdentity()                                                   { GetContext().setMatrix(Mat4(1.0f));                }
+IM3D_EXPORT inline void  PushMatrix()                                                    { GetContext().pushMatrix(GetContext().getMatrix()); }
+IM3D_EXPORT inline void  PushMatrix(const Mat4& _mat4)                                   { GetContext().pushMatrix(_mat4);                    }
+IM3D_EXPORT inline void  PopMatrix()                                                     { GetContext().popMatrix();                          }
+IM3D_EXPORT inline void  SetMatrix(const Mat4& _mat4)                                    { GetContext().setMatrix(_mat4);                     }
+IM3D_EXPORT inline void  SetIdentity()                                                   { GetContext().setMatrix(Mat4(1.0f));                }
 
-inline void  PushId()                                                        { GetContext().pushId(GetContext().getId()); }
-inline void  PushId(Id _id)                                                  { GetContext().pushId(_id);                  }
-inline void  PushId(const char* _str)                                        { GetContext().pushId(MakeId(_str));         }
-inline void  PushId(const void* _ptr)                                        { GetContext().pushId(MakeId(_ptr));         }
-inline void  PushId(int _i)                                                  { GetContext().pushId(MakeId(_i));           }
-inline void  PopId()                                                         { GetContext().popId();                      }
-inline Id    GetId()                                                         { return GetContext().getId();               }
-inline Id    GetActiveId()                                                   { return GetContext().m_appActiveId;         }
-inline Id    GetHotId()                                                      { return GetContext().m_appHotId;            }
+IM3D_EXPORT inline void  PushId()                                                        { GetContext().pushId(GetContext().getId()); }
+IM3D_EXPORT inline void  PushId(Id _id)                                                  { GetContext().pushId(_id);                  }
+IM3D_EXPORT inline void  PushId(const char* _str)                                        { GetContext().pushId(MakeId(_str));         }
+IM3D_EXPORT inline void  PushId(const void* _ptr)                                        { GetContext().pushId(MakeId(_ptr));         }
+IM3D_EXPORT inline void  PushId(int _i)                                                  { GetContext().pushId(MakeId(_i));           }
+IM3D_EXPORT inline void  PopId()                                                         { GetContext().popId();                      }
+IM3D_EXPORT inline Id    GetId()                                                         { return GetContext().getId();               }
+IM3D_EXPORT inline Id    GetActiveId()                                                   { return GetContext().m_appActiveId;         }
+IM3D_EXPORT inline Id    GetHotId()                                                      { return GetContext().m_appHotId;            }
 
-inline void  PushLayerId()                                                   { GetContext().pushLayerId(GetContext().getLayerId()); }
-inline void  PushLayerId(Id _layer)                                          { GetContext().pushLayerId(_layer); }
-inline void  PushLayerId(const char* _str)                                   { PushLayerId(MakeId(_str));        }
-inline void  PopLayerId()                                                    { GetContext().popLayerId();        }
-inline Id    GetLayerId()                                                    { return GetContext().getLayerId(); }
+IM3D_EXPORT inline void  PushLayerId()                                                   { GetContext().pushLayerId(GetContext().getLayerId()); }
+IM3D_EXPORT inline void  PushLayerId(Id _layer)                                          { GetContext().pushLayerId(_layer); }
+IM3D_EXPORT inline void  PushLayerId(const char* _str)                                   { PushLayerId(MakeId(_str));        }
+IM3D_EXPORT inline void  PopLayerId()                                                    { GetContext().popLayerId();        }
+IM3D_EXPORT inline Id    GetLayerId()                                                    { return GetContext().getLayerId(); }
 
-inline bool GizmoTranslation(const char* _id, float _translation_[3], bool _local)                   { return GizmoTranslation(MakeId(_id), _translation_, _local);   }
-inline bool GizmoRotation(const char* _id, float _rotation_[3*3], bool _local)                       { return GizmoRotation(MakeId(_id), _rotation_, _local);         }
-inline bool GizmoScale(const char* _id, float _scale_[3])                                            { return GizmoScale(MakeId(_id), _scale_);                       }
-inline bool Gizmo(const char* _id, float _translation_[3], float _rotation_[3*3], float _scale_[3])  { return Gizmo(MakeId(_id), _translation_, _rotation_, _scale_); }
-inline bool Gizmo(const char* _id, float _transform_[4*4])                                           { return Gizmo(MakeId(_id), _transform_);                        }
+IM3D_EXPORT inline bool GizmoTranslation(const char* _id, float _translation_[3], bool _local)                   { return GizmoTranslation(MakeId(_id), _translation_, _local);   }
+IM3D_EXPORT inline bool GizmoRotation(const char* _id, float _rotation_[3*3], bool _local)                       { return GizmoRotation(MakeId(_id), _rotation_, _local);         }
+IM3D_EXPORT inline bool GizmoScale(const char* _id, float _scale_[3])                                            { return GizmoScale(MakeId(_id), _scale_);                       }
+IM3D_EXPORT inline bool Gizmo(const char* _id, float _translation_[3], float _rotation_[3*3], float _scale_[3])  { return Gizmo(MakeId(_id), _translation_, _rotation_, _scale_); }
+IM3D_EXPORT inline bool Gizmo(const char* _id, float _transform_[4*4])                                           { return Gizmo(MakeId(_id), _transform_);                        }
 
-inline bool IsVisible(const Vec3& _origin, float _radius)                    { return GetContext().isVisible(_origin, _radius); }
-inline bool IsVisible(const Vec3& _min, const Vec3& _max)                    { return GetContext().isVisible(_min, _max);       }
+IM3D_EXPORT inline bool IsVisible(const Vec3& _origin, float _radius)                    { return GetContext().isVisible(_origin, _radius); }
+IM3D_EXPORT inline bool IsVisible(const Vec3& _min, const Vec3& _max)                    { return GetContext().isVisible(_min, _max);       }
 
-inline Context& GetContext()                                                 { return *internal::g_CurrentContext; }
-inline void     SetContext(Context& _ctx)                                    { internal::g_CurrentContext = &_ctx; }
+IM3D_EXPORT inline Context& GetContext()                                                 { return *internal::g_CurrentContext; }
+IM3D_EXPORT inline void     SetContext(Context& _ctx)                                    { internal::g_CurrentContext = &_ctx; }
 
-inline void     MergeContexts(Context& _dst_, const Context& _src)           { _dst_.merge(_src); }
+IM3D_EXPORT inline void     MergeContexts(Context& _dst_, const Context& _src)           { _dst_.merge(_src); }
 
 } // namespac Im3d
 
