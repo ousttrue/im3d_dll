@@ -4,7 +4,7 @@
 #include <array>
 #include <string>
 #include <GL/glew.h>
-#include "teapot.h"
+#include "../teapot.h"
 
 const std::string g_vs =
 #include "model.vs"

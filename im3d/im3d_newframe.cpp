@@ -1,8 +1,6 @@
 #include "im3d_newframe.h"
 #include "im3d.h"
 #include "im3d_math.h"
-#include <GL/glew.h>
-#include "../im3d_gl3/gl3_createshader.h"
 
 static_assert(sizeof(Im3d::VertexData) % 16 == 0);
 

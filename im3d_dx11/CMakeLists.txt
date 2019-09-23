@@ -1,30 +1,24 @@
-SET(SUBNAME im3d_gl3)
+SET(SUBNAME im3d_dx11)
 ADD_LIBRARY(${SUBNAME} SHARED)
 CMAKE_POLICY(SET CMP0076 NEW) # CMakeが自動的に相対パスを絶対パスへ変換する
 TARGET_SOURCES(${SUBNAME} PRIVATE
-    wgl_context.cpp
-    gl3_renderer.cpp
-    im3d_impl_gl3.cpp
+    dx11_renderer.cpp
+    im3d_impl_dx11.cpp
+    )
+TARGET_COMPILE_OPTIONS(${SUBNAME} PRIVATE
+    /std:c++latest 
+    /EHsc
     )
 TARGET_INCLUDE_DIRECTORIES(${SUBNAME} PRIVATE
     .
-    ../glew
     ../im3d
     )
-
-# ADD_DEFINITIONS(
-#     -DNOMINMAX
-#     -DIM3D_OPENGL
-#     -DIM3D_OPENGL_VSHADER=140
-#     -DIM3D_OPENGL_VMAJ=3
-#     -DIM3D_OPENGL_VMIN=0
-#     )
-
 TARGET_COMPILE_DEFINITIONS(${SUBNAME} PRIVATE
     IM3D_VERTEX_ALIGNMENT=16
-    EXPORT_IM3D_GL3
+    EXPORT_IM3D_DX11
     )
-TARGET_LINK_LIBRARIES(${SUBNAME}
-    glew
+TARGET_LINK_LIBRARIES(${SUBNAME} PRIVATE
     im3d
+    d3d11
+    d3dcompiler
     )
