@@ -22,7 +22,7 @@
 //#define IM3D_MATRIX_ROW_MAJOR 1
 
 // Force vertex data alignment (default is 4 bytes).
-//#define IM3D_VERTEX_ALIGNMENT 4
+#define IM3D_VERTEX_ALIGNMENT 16
 
 // Enable internal culling for primitives (everything drawn between Begin*()/End()). The application must set a culling frustum via AppData.
 //#define IM3D_CULL_PRIMITIVES 1
