@@ -1,6 +1,6 @@
 #include "dx11_renderer.h"
 #include "dx11_rendertarget.h"
-#include "../teapot.h"
+#include "../im3d/teapot.h"
 #include <string>
 #include <array>
 #include <d3d11.h>
