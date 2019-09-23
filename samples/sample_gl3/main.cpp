@@ -1,32 +1,24 @@
-#include "win32_window.h"
 #include <im3d.h>
 #include <im3d_newframe.h>
-#include "orbit_camera.h"
-// #include <gl3_renderer.h>
-#include <dx11_renderer.h>
-#include "dx11_context.h"
+#include "../win32_window.h"
+#include "../orbit_camera.h"
+#include <gl3_renderer.h>
 
 int main(int, char **)
 {
     Win32Window window;
-    if (!window.Create(640, 480, L"Im3d Example"))
+    if (!window.Create(640, 480, L"sample_gl3"))
     {
         return 1;
     }
 
     OrbitCamera camera;
 
-    DX11Context dx11;
-    if(!dx11.Create(window.GetHandle()))
-    {
-        return 3;
-    }
-
-    if (!DX11_Initialize(window.GetHandle()))
+    if (!GL3_Initialize(window.GetHandle()))
     {
         return 1;
     }
-    if (!Im3d_DX11_Initialize())
+    if (!Im3d_GL3_Initialize())
     {
         return 2;
     }
@@ -65,17 +57,16 @@ int main(int, char **)
         Im3d::Gizmo("GizmoUnified", transform.data());
         Im3d::EndFrame();
 
-        auto context = dx11.NewFrame(w, h);
+        GL3_NewFrame(w, h);
         {
-            DX11_DrawTeapot(context, camera.state.viewProjection.data(), transform.data());
-
-            Im3d_DX11_Draw(context, camera.state.viewProjection.data(), w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
+            GL3_DrawTeapot(camera.state.viewProjection.data(), transform.data());
+            Im3d_GL3_Draw(camera.state.viewProjection.data(), w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
         }
-        dx11.Present();
+        GL3_EndFrame();
     }
 
-    Im3d_DX11_Finalize();
-    DX11_Finalize();
+    Im3d_GL3_Finalize();
+    GL3_Finalize();
 
     return 0;
 }

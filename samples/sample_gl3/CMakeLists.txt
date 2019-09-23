@@ -1,9 +1,10 @@
-SET(SUBNAME im3d_sample)
-FILE(GLOB SRC
-        *.cpp
-    ) 
+SET(SUBNAME sample_gl3)
 ADD_EXECUTABLE(${SUBNAME}
-    ${SRC}
+    )
+TARGET_SOURCES(${SUBNAME} PRIVATE
+    main.cpp
+    ../orbit_camera.cpp
+    ../win32_window.cpp
     )
 TARGET_COMPILE_OPTIONS(${SUBNAME} PRIVATE
     /std:c++latest 
@@ -11,9 +12,8 @@ TARGET_COMPILE_OPTIONS(${SUBNAME} PRIVATE
     )
 TARGET_INCLUDE_DIRECTORIES(${SUBNAME} PRIVATE
     .
-    ../im3d
-    # ../im3d_gl3
-    ../im3d_dx11
+    ../../im3d
+    ../../im3d_gl3
     )
 TARGET_COMPILE_DEFINITIONS(${SUBNAME} PRIVATE
     NOMINMAX
@@ -24,7 +24,5 @@ TARGET_COMPILE_DEFINITIONS(${SUBNAME} PRIVATE
 TARGET_LINK_LIBRARIES(${SUBNAME}
     WINMM
     im3d
-    # im3d_gl3
-    im3d_dx11
-    d3d11
+    im3d_gl3
     )

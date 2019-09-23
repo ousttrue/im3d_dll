@@ -5,10 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
+            "name": "sample_gl3",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/im3d_sample.exe",
+            "program": "${workspaceFolder}/build/bin/sample_gl3.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false
+        },
+        {
+            "name": "sample_dx11",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/sample_dx11.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
