@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef gl3_EXPORTS
+#ifdef EXPORT_IM3D_GL3
 #define GL3_EXPORT __declspec(dllexport)
 #else
 #define GL3_EXPORT __declspec(dllimport)

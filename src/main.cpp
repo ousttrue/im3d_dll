@@ -67,6 +67,7 @@ int main(int, char **)
     }
 
     Im3d_GL3_Finalize();
+    GL3_Finalize();
 
     return 0;
 }
