@@ -12,4 +12,3 @@ GL3_EXPORT void GL3_Finalize();
 GL3_EXPORT void GL3_NewFrame(int screenWidth, int screenHeight);
 GL3_EXPORT void GL3_DrawTeapot(const float *viewProjection, const float *world);
 GL3_EXPORT void GL3_EndFrame();
-GL3_EXPORT unsigned int GL3_CreateShader(const std::string &vsSrc, const std::string &fsSrc);

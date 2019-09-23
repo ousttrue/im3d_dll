@@ -18,7 +18,7 @@ int main(int, char **)
     {
         return 1;
     }
-    if (!Im3dGui_Initialize())
+    if (!Im3d_GL3_Initialize())
     {
         return 2;
     }
@@ -61,10 +61,12 @@ int main(int, char **)
         {
             GL3_DrawTeapot(camera.state.viewProjection.data(), transform.data());
 
-            Im3dGui_Impl_GL3_Draw(camera.state.viewProjection.data(), w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
+            Im3d_GL3_Draw(camera.state.viewProjection.data(), w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
         }
         GL3_EndFrame();
     }
+
+    Im3d_GL3_Finalize();
 
     return 0;
 }
