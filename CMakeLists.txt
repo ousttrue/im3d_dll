@@ -16,4 +16,4 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #
 # sub projects
 #
-SUBDIRS(glew im3d src)
+SUBDIRS(glew gl3 im3d src)
