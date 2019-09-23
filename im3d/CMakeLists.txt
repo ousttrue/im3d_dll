@@ -3,7 +3,7 @@ ADD_LIBRARY(${SUBNAME} SHARED)
 CMAKE_POLICY(SET CMP0076 NEW) # CMakeが自動的に相対パスを絶対パスへ変換する
 TARGET_SOURCES(${SUBNAME} PRIVATE
     im3d.cpp
-    im3d_gui.cpp
+    im3d_newframe.cpp
     )
 TARGET_COMPILE_OPTIONS(${SUBNAME} PRIVATE
     /std:c++latest 

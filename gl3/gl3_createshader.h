@@ -1,5 +1,7 @@
 #pragma once
 #include <GL/glew.h>
+#include <string>
+
 
 inline GLuint CompileShader(GLenum stage, const std::string &src)
 {
