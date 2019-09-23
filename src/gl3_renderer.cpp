@@ -1,4 +1,5 @@
 #include "gl3_renderer.h"
+#include "wgl_context.h"
 #include <array>
 #include <string>
 #include <GL/glew.h>
@@ -10,6 +11,18 @@ const std::string g_vs =
 const std::string g_fs =
 #include "model.fs"
     ;
+
+class GL3RendererImpl;
+class GL3Renderer
+{
+    GL3RendererImpl *m_impl = nullptr;
+
+public:
+    GL3Renderer();
+    ~GL3Renderer();
+    void NewFrame(int screenWidth, int screenHeight);
+    void DrawTeapot(const float *viewProjection, const float *world);
+};
 
 GL3Renderer::GL3Renderer()
 {
@@ -80,7 +93,7 @@ static bool LinkShaderProgram(GLuint _handle)
     return true;
 }
 
-unsigned int CreateShader(const std::string &vsSrc, const std::string &fsSrc)
+unsigned int GL3_CreateShader(const std::string &vsSrc, const std::string &fsSrc)
 {
     auto vs = CompileShader(GL_VERTEX_SHADER, vsSrc);
     if (!vs)
@@ -114,7 +127,7 @@ void GL3Renderer::DrawTeapot(const float *viewProjection, const float *world)
     static GLuint vaTeapot;
     if (shTeapot == 0)
     {
-        shTeapot = CreateShader(g_vs, g_fs);
+        shTeapot = GL3_CreateShader(g_vs, g_fs);
         glGenBuffers(1, &vbTeapot);
         glGenBuffers(1, &ibTeapot);
         glGenVertexArrays(1, &vaTeapot);
@@ -144,3 +157,42 @@ void GL3Renderer::DrawTeapot(const float *viewProjection, const float *world)
     glBindVertexArray(0);
     glUseProgram(0);
 }
+
+WGLContext g_glcontext;
+GL3Renderer *g_renderer = nullptr;
+
+bool GL3_Initialize(void *hwnd)
+{
+    if (!g_glcontext.Create(hwnd, 3, 0))
+    {
+        return false;
+    }
+    g_renderer = new GL3Renderer();
+    return true;
+}
+
+void GL3_Finalize()
+{
+    if (g_renderer)
+    {
+        delete g_renderer;
+        g_renderer = nullptr;
+    }
+}
+
+void GL3_NewFrame(int screenWidth, int screenHeight)
+{
+    g_renderer->NewFrame(screenWidth, screenHeight);
+}
+
+void GL3_DrawTeapot(const float *viewProjection, const float *world)
+{
+    g_renderer->DrawTeapot(viewProjection, world);
+}
+
+void GL3_EndFrame()
+{
+    g_glcontext.Present();
+}
+
+// unsigned int GL3_CreateShader(const std::string &vsSrc, const std::string &fsSrc)

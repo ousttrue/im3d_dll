@@ -3,8 +3,21 @@
 #include <im3d_math.h>
 #include <GL/glew.h>
 #include "gl3_renderer.h"
-#include "camera_state.h"
-#include "mouse_state.h"
+// #include "camera_state.h"
+// #include "mouse_state.h"
+
+class Im3dGuiImpl;
+class Im3dGui
+{
+    Im3dGuiImpl *m_impl = nullptr;
+
+public:
+    Im3dGui();
+    ~Im3dGui();
+    void NewFrame(const camera::CameraState *camera, const MouseState *mouse, float deltaTime);
+    void Manipulate(float world[16]);
+    void Draw(const float *viewProjection, int w, int h);
+};
 
 const std::string g_points_vs =
 #include "im3d_points.vs"
@@ -42,17 +55,17 @@ public:
         static_assert(sizeof(Im3d::VertexData) % 16 == 0);
 
         {
-            g_Im3dShaderPoints = CreateShader(g_points_vs, g_points_fs);
+            g_Im3dShaderPoints = GL3_CreateShader(g_points_vs, g_points_fs);
             auto blockIndex = glGetUniformBlockIndex(g_Im3dShaderPoints, "VertexDataBlock");
             glUniformBlockBinding(g_Im3dShaderPoints, blockIndex, 0);
         }
         {
-            g_Im3dShaderLines = CreateShader(g_lines_vs, g_lines_fs);
+            g_Im3dShaderLines = GL3_CreateShader(g_lines_vs, g_lines_fs);
             auto blockIndex = glGetUniformBlockIndex(g_Im3dShaderLines, "VertexDataBlock");
             glUniformBlockBinding(g_Im3dShaderLines, blockIndex, 0);
         }
         {
-            g_Im3dShaderTriangles = CreateShader(g_triangles_vs, g_triangles_fs);
+            g_Im3dShaderTriangles = GL3_CreateShader(g_triangles_vs, g_triangles_fs);
             auto blockIndex = glGetUniformBlockIndex(g_Im3dShaderTriangles, "VertexDataBlock");
             glUniformBlockBinding(g_Im3dShaderTriangles, blockIndex, 0);
         }
@@ -247,9 +260,44 @@ void Im3dGui::Manipulate(float world[16])
 
 void Im3dGui::Draw(const float *viewProjection, int w, int h)
 {
-    Im3d::EndFrame();
-
     m_impl->Draw(viewProjection, w, h);
 
     glDisable(GL_BLEND);
+}
+
+Im3dGui *g_gui = nullptr;
+
+bool Im3dGui_Initialize()
+{
+    g_gui = new Im3dGui();
+    return true;
+}
+
+void Im3dGui_Finalize()
+{
+    if (g_gui)
+    {
+        delete g_gui;
+        g_gui = nullptr;
+    }
+}
+
+void Im3dGui_NewFrame(const camera::CameraState *camera, const MouseState *mouse, float deltaTime)
+{
+    g_gui->NewFrame(camera, mouse, deltaTime);
+}
+
+void Im3dGui_Manipulate(float world[16])
+{
+    g_gui->Manipulate(world);
+}
+
+void Im3dGui_EndFrame()
+{
+    Im3d::EndFrame();
+}
+
+void Im3dGui_Draw(const float *viewProjection, int w, int h)
+{
+    g_gui->Draw(viewProjection, w, h);
 }
