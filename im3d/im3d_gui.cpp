@@ -6,18 +6,6 @@
 // #include "camera_state.h"
 // #include "mouse_state.h"
 
-class Im3dGuiImpl;
-class Im3dGui
-{
-    Im3dGuiImpl *m_impl = nullptr;
-
-public:
-    Im3dGui();
-    ~Im3dGui();
-    void NewFrame(const camera::CameraState *camera, const MouseState *mouse, float deltaTime);
-    void Draw(const float *viewProjection, int w, int h);
-};
-
 const std::string g_points_vs =
 #include "im3d_points.vs"
     ;
@@ -99,18 +87,16 @@ public:
         glDeleteProgram(g_Im3dShaderTriangles);
     }
 
-    void Draw(const float *viewProj, int w, int h)
+    void Draw(const float *viewProj, int w, int h, const Im3d::DrawList *drawList, int count)
     {
         glViewport(0, 0, (GLsizei)w, (GLsizei)h);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        for (Im3d::U32 i = 0, n = Im3d::GetDrawListCount(); i < n; ++i)
+        for (int i = 0; i < count; ++i, ++drawList)
         {
-            auto &drawList = Im3d::GetDrawLists()[i];
-
-            if (drawList.m_layerId == Im3d::MakeId("NamedLayer"))
+            if (drawList->m_layerId == Im3d::MakeId("NamedLayer"))
             {
                 // The application may group primitives into layers, which can be used to change the draw state (e.g. enable depth testing, use a different shader)
             }
@@ -118,7 +104,7 @@ public:
             GLenum prim;
             GLuint sh;
             int primVertexCount;
-            switch (drawList.m_primType)
+            switch (drawList->m_primType)
             {
             case Im3d::DrawPrimitive_Points:
                 prim = GL_TRIANGLE_STRIP;
@@ -155,8 +141,8 @@ public:
             const int kMaxBufferSize = 64 * 1024; // assuming 64kb here but the application should check the implementation limit
             const int kPrimsPerPass = kMaxBufferSize / (sizeof(Im3d::VertexData) * primVertexCount);
 
-            int remainingPrimCount = drawList.m_vertexCount / primVertexCount;
-            const Im3d::VertexData *vertexData = drawList.m_vertexData;
+            int remainingPrimCount = drawList->m_vertexCount / primVertexCount;
+            const Im3d::VertexData *vertexData = drawList->m_vertexData;
             while (remainingPrimCount > 0)
             {
                 int passPrimCount = remainingPrimCount < kPrimsPerPass ? remainingPrimCount : kPrimsPerPass;
@@ -175,6 +161,21 @@ public:
         }
     }
 };
+class Im3dGui
+{
+    Im3dGuiImpl *m_impl = nullptr;
+
+public:
+    Im3dGui();
+    ~Im3dGui();
+    void NewFrame(const camera::CameraState *camera, const MouseState *mouse, float deltaTime);
+    void Draw(const float *viewProjection, int w, int h, const Im3d::DrawList *drawList, int count)
+    {
+        m_impl->Draw(viewProjection, w, h, drawList, count);
+        glDisable(GL_BLEND);
+    }
+};
+
 
 Im3dGui::Im3dGui()
     : m_impl(new Im3dGuiImpl)
@@ -186,53 +187,58 @@ Im3dGui::~Im3dGui()
     delete m_impl;
 }
 
-namespace Im3d{
-static void AppData_setCullFrustum(AppData *ad, const Mat4& _viewProj, bool _ndcZNegativeOneToOne)
+namespace Im3d
 {
-	ad->m_cullFrustum[FrustumPlane_Top].x    = _viewProj(3, 0) - _viewProj(1, 0);
-	ad->m_cullFrustum[FrustumPlane_Top].y    = _viewProj(3, 1) - _viewProj(1, 1);
-	ad->m_cullFrustum[FrustumPlane_Top].z    = _viewProj(3, 2) - _viewProj(1, 2);
-	ad->m_cullFrustum[FrustumPlane_Top].w    = -(_viewProj(3, 3) - _viewProj(1, 3));
+static void AppData_setCullFrustum(AppData *ad, const Mat4 &_viewProj, bool _ndcZNegativeOneToOne)
+{
+    ad->m_cullFrustum[FrustumPlane_Top].x = _viewProj(3, 0) - _viewProj(1, 0);
+    ad->m_cullFrustum[FrustumPlane_Top].y = _viewProj(3, 1) - _viewProj(1, 1);
+    ad->m_cullFrustum[FrustumPlane_Top].z = _viewProj(3, 2) - _viewProj(1, 2);
+    ad->m_cullFrustum[FrustumPlane_Top].w = -(_viewProj(3, 3) - _viewProj(1, 3));
 
-	ad->m_cullFrustum[FrustumPlane_Bottom].x = _viewProj(3, 0) + _viewProj(1, 0);
-	ad->m_cullFrustum[FrustumPlane_Bottom].y = _viewProj(3, 1) + _viewProj(1, 1);
-	ad->m_cullFrustum[FrustumPlane_Bottom].z = _viewProj(3, 2) + _viewProj(1, 2);
-	ad->m_cullFrustum[FrustumPlane_Bottom].w = -(_viewProj(3, 3) + _viewProj(1, 3));
+    ad->m_cullFrustum[FrustumPlane_Bottom].x = _viewProj(3, 0) + _viewProj(1, 0);
+    ad->m_cullFrustum[FrustumPlane_Bottom].y = _viewProj(3, 1) + _viewProj(1, 1);
+    ad->m_cullFrustum[FrustumPlane_Bottom].z = _viewProj(3, 2) + _viewProj(1, 2);
+    ad->m_cullFrustum[FrustumPlane_Bottom].w = -(_viewProj(3, 3) + _viewProj(1, 3));
 
-	ad->m_cullFrustum[FrustumPlane_Right].x  = _viewProj(3, 0) - _viewProj(0, 0);
-	ad->m_cullFrustum[FrustumPlane_Right].y  = _viewProj(3, 1) - _viewProj(0, 1);
-	ad->m_cullFrustum[FrustumPlane_Right].z  = _viewProj(3, 2) - _viewProj(0, 2);
-	ad->m_cullFrustum[FrustumPlane_Right].w  = -(_viewProj(3, 3) - _viewProj(0, 3));
+    ad->m_cullFrustum[FrustumPlane_Right].x = _viewProj(3, 0) - _viewProj(0, 0);
+    ad->m_cullFrustum[FrustumPlane_Right].y = _viewProj(3, 1) - _viewProj(0, 1);
+    ad->m_cullFrustum[FrustumPlane_Right].z = _viewProj(3, 2) - _viewProj(0, 2);
+    ad->m_cullFrustum[FrustumPlane_Right].w = -(_viewProj(3, 3) - _viewProj(0, 3));
 
-	ad->m_cullFrustum[FrustumPlane_Left].x   = _viewProj(3, 0) + _viewProj(0, 0);
-	ad->m_cullFrustum[FrustumPlane_Left].y   = _viewProj(3, 1) + _viewProj(0, 1);
-	ad->m_cullFrustum[FrustumPlane_Left].z   = _viewProj(3, 2) + _viewProj(0, 2);
-	ad->m_cullFrustum[FrustumPlane_Left].w   = -(_viewProj(3, 3) + _viewProj(0, 3));
+    ad->m_cullFrustum[FrustumPlane_Left].x = _viewProj(3, 0) + _viewProj(0, 0);
+    ad->m_cullFrustum[FrustumPlane_Left].y = _viewProj(3, 1) + _viewProj(0, 1);
+    ad->m_cullFrustum[FrustumPlane_Left].z = _viewProj(3, 2) + _viewProj(0, 2);
+    ad->m_cullFrustum[FrustumPlane_Left].w = -(_viewProj(3, 3) + _viewProj(0, 3));
 
-	ad->m_cullFrustum[FrustumPlane_Far].x    = _viewProj(3, 0) - _viewProj(2, 0);
-	ad->m_cullFrustum[FrustumPlane_Far].y    = _viewProj(3, 1) - _viewProj(2, 1);
-	ad->m_cullFrustum[FrustumPlane_Far].z    = _viewProj(3, 2) - _viewProj(2, 2);
-	ad->m_cullFrustum[FrustumPlane_Far].w    = -(_viewProj(3, 3) - _viewProj(2, 3));
+    ad->m_cullFrustum[FrustumPlane_Far].x = _viewProj(3, 0) - _viewProj(2, 0);
+    ad->m_cullFrustum[FrustumPlane_Far].y = _viewProj(3, 1) - _viewProj(2, 1);
+    ad->m_cullFrustum[FrustumPlane_Far].z = _viewProj(3, 2) - _viewProj(2, 2);
+    ad->m_cullFrustum[FrustumPlane_Far].w = -(_viewProj(3, 3) - _viewProj(2, 3));
 
-	if (_ndcZNegativeOneToOne) {
-		ad->m_cullFrustum[FrustumPlane_Near].x = _viewProj(3, 0) + _viewProj(2, 0);
-		ad->m_cullFrustum[FrustumPlane_Near].y = _viewProj(3, 1) + _viewProj(2, 1);
-		ad->m_cullFrustum[FrustumPlane_Near].z = _viewProj(3, 2) + _viewProj(2, 2);
-		ad->m_cullFrustum[FrustumPlane_Near].w = -(_viewProj(3, 3) + _viewProj(2, 3));
-	} else {
-		ad->m_cullFrustum[FrustumPlane_Near].x = _viewProj(2, 0);
-		ad->m_cullFrustum[FrustumPlane_Near].y = _viewProj(2, 1);
-		ad->m_cullFrustum[FrustumPlane_Near].z = _viewProj(2, 2);
-		ad->m_cullFrustum[FrustumPlane_Near].w = -(_viewProj(2, 3));
-	}
+    if (_ndcZNegativeOneToOne)
+    {
+        ad->m_cullFrustum[FrustumPlane_Near].x = _viewProj(3, 0) + _viewProj(2, 0);
+        ad->m_cullFrustum[FrustumPlane_Near].y = _viewProj(3, 1) + _viewProj(2, 1);
+        ad->m_cullFrustum[FrustumPlane_Near].z = _viewProj(3, 2) + _viewProj(2, 2);
+        ad->m_cullFrustum[FrustumPlane_Near].w = -(_viewProj(3, 3) + _viewProj(2, 3));
+    }
+    else
+    {
+        ad->m_cullFrustum[FrustumPlane_Near].x = _viewProj(2, 0);
+        ad->m_cullFrustum[FrustumPlane_Near].y = _viewProj(2, 1);
+        ad->m_cullFrustum[FrustumPlane_Near].z = _viewProj(2, 2);
+        ad->m_cullFrustum[FrustumPlane_Near].w = -(_viewProj(2, 3));
+    }
 
- // normalize
-	for (int i = 0; i < FrustumPlane_Count; ++i) {
-		float d = 1.0f / Length(Vec3(ad->m_cullFrustum[i]));
-		ad->m_cullFrustum[i] = ad->m_cullFrustum[i] * d;
-	}
+    // normalize
+    for (int i = 0; i < FrustumPlane_Count; ++i)
+    {
+        float d = 1.0f / Length(Vec3(ad->m_cullFrustum[i]));
+        ad->m_cullFrustum[i] = ad->m_cullFrustum[i] * d;
+    }
 }
-}
+} // namespace Im3d
 
 void Im3dGui::NewFrame(const camera::CameraState *c, const MouseState *mouse, float deltaTime)
 {
@@ -301,13 +307,6 @@ void Im3dGui::NewFrame(const camera::CameraState *c, const MouseState *mouse, fl
     Im3d::NewFrame();
 }
 
-void Im3dGui::Draw(const float *viewProjection, int w, int h)
-{
-    m_impl->Draw(viewProjection, w, h);
-
-    glDisable(GL_BLEND);
-}
-
 Im3dGui *g_gui = nullptr;
 
 bool Im3dGui_Initialize()
@@ -330,12 +329,7 @@ void Im3dGui_NewFrame(const camera::CameraState *camera, const MouseState *mouse
     g_gui->NewFrame(camera, mouse, deltaTime);
 }
 
-void Im3dGui_EndFrame()
+void Im3dGui_Impl_GL3_Draw(const float *viewProjection, int w, int h, const struct Im3d::DrawList *drawList, int count)
 {
-    Im3d::EndFrame();
-}
-
-void Im3dGui_Draw(const float *viewProjection, int w, int h)
-{
-    g_gui->Draw(viewProjection, w, h);
+    g_gui->Draw(viewProjection, w, h, drawList, count);
 }

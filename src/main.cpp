@@ -4,7 +4,6 @@
 #include "orbit_camera.h"
 #include <gl3_renderer.h>
 
-
 int main(int, char **)
 {
     Win32Window window;
@@ -56,12 +55,13 @@ int main(int, char **)
 
         Im3dGui_NewFrame(&camera.state, &mouse, 0);
         Im3d::Gizmo("GizmoUnified", transform.data());
-        Im3dGui_EndFrame();
+        Im3d::EndFrame();
 
         GL3_NewFrame(w, h);
         {
             GL3_DrawTeapot(camera.state.viewProjection.data(), transform.data());
-            Im3dGui_Draw(camera.state.viewProjection.data(), w, h);
+
+            Im3dGui_Impl_GL3_Draw(camera.state.viewProjection.data(), w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
         }
         GL3_EndFrame();
     }

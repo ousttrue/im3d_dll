@@ -9,5 +9,9 @@
         "glcontext",
         "pformat"
     ],
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "*.cshtml": "html",
+        "*.vs": "cpp"
+    }
 }
