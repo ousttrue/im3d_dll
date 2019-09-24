@@ -411,7 +411,7 @@ struct DrawList
     const VertexData *m_vertexData;
     U32 m_vertexCount;
 };
-IM3D_EXPORT typedef void(DrawPrimitivesCallback)(const DrawList &_drawList);
+typedef void(DrawPrimitivesCallback)(const DrawList &_drawList);
 
 enum Key
 {
@@ -754,108 +754,6 @@ namespace internal
 #endif
 extern IM3D_THREAD_LOCAL Context *g_CurrentContext;
 } // namespace internal
-
-IM3D_EXPORT inline AppData &GetAppData() { return GetContext().getAppData(); }
-IM3D_EXPORT inline void NewFrame() { GetContext().reset(); }
-IM3D_EXPORT inline void EndFrame() { GetContext().endFrame(); }
-IM3D_EXPORT inline void Draw() { GetContext().draw(); }
-
-IM3D_EXPORT inline const DrawList *GetDrawLists() { return GetContext().getDrawLists(); }
-IM3D_EXPORT inline U32 GetDrawListCount() { return GetContext().getDrawListCount(); }
-
-IM3D_EXPORT inline void BeginPoints() { GetContext().begin(PrimitiveMode_Points); }
-IM3D_EXPORT inline void BeginLines() { GetContext().begin(PrimitiveMode_Lines); }
-IM3D_EXPORT inline void BeginLineLoop() { GetContext().begin(PrimitiveMode_LineLoop); }
-IM3D_EXPORT inline void BeginLineStrip() { GetContext().begin(PrimitiveMode_LineStrip); }
-IM3D_EXPORT inline void BeginTriangles() { GetContext().begin(PrimitiveMode_Triangles); }
-IM3D_EXPORT inline void BeginTriangleStrip() { GetContext().begin(PrimitiveMode_TriangleStrip); }
-IM3D_EXPORT inline void End() { GetContext().end(); }
-
-IM3D_EXPORT inline void Vertex(const Vec3 &_position) { GetContext().vertex(_position, GetContext().getSize(), GetContext().getColor()); }
-IM3D_EXPORT inline void Vertex(const Vec3 &_position, Color _color) { GetContext().vertex(_position, GetContext().getSize(), _color); }
-IM3D_EXPORT inline void Vertex(const Vec3 &_position, float _size) { GetContext().vertex(_position, _size, GetContext().getColor()); }
-IM3D_EXPORT inline void Vertex(const Vec3 &_position, float _size, Color _color) { GetContext().vertex(_position, _size, _color); }
-IM3D_EXPORT inline void Vertex(float _x, float _y, float _z) { Vertex(Vec3(_x, _y, _z)); }
-IM3D_EXPORT inline void Vertex(float _x, float _y, float _z, Color _color) { Vertex(Vec3(_x, _y, _z), _color); }
-IM3D_EXPORT inline void Vertex(float _x, float _y, float _z, float _size) { Vertex(Vec3(_x, _y, _z), _size); }
-IM3D_EXPORT inline void Vertex(float _x, float _y, float _z, float _size, Color _color) { Vertex(Vec3(_x, _y, _z), _size, _color); }
-
-IM3D_EXPORT inline void PushDrawState()
-{
-    Context &ctx = GetContext();
-    ctx.pushColor(ctx.getColor());
-    ctx.pushAlpha(ctx.getAlpha());
-    ctx.pushSize(ctx.getSize());
-    ctx.pushEnableSorting(ctx.getEnableSorting());
-}
-IM3D_EXPORT inline void PopDrawState()
-{
-    Context &ctx = GetContext();
-    ctx.popColor();
-    ctx.popAlpha();
-    ctx.popSize();
-    ctx.popEnableSorting();
-}
-
-IM3D_EXPORT inline void PushColor() { GetContext().pushColor(GetContext().getColor()); }
-IM3D_EXPORT inline void PushColor(Color _color) { GetContext().pushColor(_color); }
-IM3D_EXPORT inline void PopColor() { GetContext().popColor(); }
-IM3D_EXPORT inline void SetColor(Color _color) { GetContext().setColor(_color); }
-IM3D_EXPORT inline void SetColor(float _r, float _g, float _b, float _a) { GetContext().setColor(Color(_r, _g, _b, _a)); }
-IM3D_EXPORT inline Color GetColor() { return GetContext().getColor(); }
-
-IM3D_EXPORT inline void PushAlpha() { GetContext().pushAlpha(GetContext().getAlpha()); }
-IM3D_EXPORT inline void PushAlpha(float _alpha) { GetContext().pushAlpha(_alpha); }
-IM3D_EXPORT inline void PopAlpha() { GetContext().popAlpha(); }
-IM3D_EXPORT inline void SetAlpha(float _alpha) { GetContext().setAlpha(_alpha); }
-IM3D_EXPORT inline float GetAlpha() { return GetContext().getAlpha(); }
-
-IM3D_EXPORT inline void PushSize() { GetContext().pushSize(GetContext().getAlpha()); }
-IM3D_EXPORT inline void PushSize(float _size) { GetContext().pushSize(_size); }
-IM3D_EXPORT inline void PopSize() { GetContext().popSize(); }
-IM3D_EXPORT inline void SetSize(float _size) { GetContext().setSize(_size); }
-IM3D_EXPORT inline float GetSize() { return GetContext().getSize(); }
-
-IM3D_EXPORT inline void PushEnableSorting() { GetContext().pushEnableSorting(GetContext().getEnableSorting()); }
-IM3D_EXPORT inline void PushEnableSorting(bool _enable) { GetContext().pushEnableSorting(_enable); }
-IM3D_EXPORT inline void PopEnableSorting() { GetContext().popEnableSorting(); }
-IM3D_EXPORT inline void EnableSorting(bool _enable) { GetContext().setEnableSorting(_enable); }
-
-IM3D_EXPORT inline void PushMatrix() { GetContext().pushMatrix(GetContext().getMatrix()); }
-IM3D_EXPORT inline void PushMatrix(const Mat4 &_mat4) { GetContext().pushMatrix(_mat4); }
-IM3D_EXPORT inline void PopMatrix() { GetContext().popMatrix(); }
-IM3D_EXPORT inline void SetMatrix(const Mat4 &_mat4) { GetContext().setMatrix(_mat4); }
-IM3D_EXPORT inline void SetIdentity() { GetContext().setMatrix(Mat4(1.0f)); }
-
-IM3D_EXPORT inline void PushId() { GetContext().pushId(GetContext().getId()); }
-IM3D_EXPORT inline void PushId(Id _id) { GetContext().pushId(_id); }
-IM3D_EXPORT inline void PushId(const char *_str) { GetContext().pushId(MakeId(_str)); }
-IM3D_EXPORT inline void PushId(const void *_ptr) { GetContext().pushId(MakeId(_ptr)); }
-IM3D_EXPORT inline void PushId(int _i) { GetContext().pushId(MakeId(_i)); }
-IM3D_EXPORT inline void PopId() { GetContext().popId(); }
-IM3D_EXPORT inline Id GetId() { return GetContext().getId(); }
-IM3D_EXPORT inline Id GetActiveId() { return GetContext().m_appActiveId; }
-IM3D_EXPORT inline Id GetHotId() { return GetContext().m_appHotId; }
-
-IM3D_EXPORT inline void PushLayerId() { GetContext().pushLayerId(GetContext().getLayerId()); }
-IM3D_EXPORT inline void PushLayerId(Id _layer) { GetContext().pushLayerId(_layer); }
-IM3D_EXPORT inline void PushLayerId(const char *_str) { PushLayerId(MakeId(_str)); }
-IM3D_EXPORT inline void PopLayerId() { GetContext().popLayerId(); }
-IM3D_EXPORT inline Id GetLayerId() { return GetContext().getLayerId(); }
-
-IM3D_EXPORT inline bool GizmoTranslation(const char *_id, float _translation_[3], bool _local) { return GizmoTranslation(MakeId(_id), _translation_, _local); }
-IM3D_EXPORT inline bool GizmoRotation(const char *_id, float _rotation_[3 * 3], bool _local) { return GizmoRotation(MakeId(_id), _rotation_, _local); }
-IM3D_EXPORT inline bool GizmoScale(const char *_id, float _scale_[3]) { return GizmoScale(MakeId(_id), _scale_); }
-IM3D_EXPORT inline bool Gizmo(const char *_id, float _translation_[3], float _rotation_[3 * 3], float _scale_[3]) { return Gizmo(MakeId(_id), _translation_, _rotation_, _scale_); }
-IM3D_EXPORT inline bool Gizmo(const char *_id, float _transform_[4 * 4]) { return Gizmo(MakeId(_id), _transform_); }
-
-IM3D_EXPORT inline bool IsVisible(const Vec3 &_origin, float _radius) { return GetContext().isVisible(_origin, _radius); }
-IM3D_EXPORT inline bool IsVisible(const Vec3 &_min, const Vec3 &_max) { return GetContext().isVisible(_min, _max); }
-
-IM3D_EXPORT inline Context &GetContext() { return *internal::g_CurrentContext; }
-IM3D_EXPORT inline void SetContext(Context &_ctx) { internal::g_CurrentContext = &_ctx; }
-
-IM3D_EXPORT inline void MergeContexts(Context &_dst_, const Context &_src) { _dst_.merge(_src); }
 
 } // namespace Im3d
 
