@@ -258,7 +258,7 @@ void DX11Renderer::DrawTeapot(void *deviceContext, const float *viewProjection, 
 
 DX11Renderer *g_renderer = nullptr;
 
-DX11_EXPORT bool DX11_Initialize(void *hwnd)
+DX11_EXPORT bool DX11_Initialize()
 {
     g_renderer = new DX11Renderer();
     return true;
