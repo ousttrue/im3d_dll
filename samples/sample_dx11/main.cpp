@@ -21,7 +21,7 @@ int main(int, char **)
         return 3;
     }
 
-    if (!DX11_Initialize(window.GetHandle()))
+    if (!DX11_Initialize())
     {
         return 1;
     }
