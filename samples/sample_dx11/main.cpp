@@ -61,7 +61,11 @@ int main(int, char **)
         camera.state.CalcViewProjection();
 
         Im3dGui_NewFrame(&camera.state, &mouse, 0);
+        #if 1
         Im3d::Gizmo("GizmoUnified", transform.data());
+        #else
+        Im3d::GizmoTranslation("GizmoUnified", transform.data()+12);
+        #endif
         Im3d::EndFrame();
 
         auto context = dx11.NewFrame(w, h);
