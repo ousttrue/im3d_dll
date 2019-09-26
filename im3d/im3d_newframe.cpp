@@ -9,7 +9,7 @@ namespace Im3d
 
 } // namespace Im3d
 
-void Im3dGui_NewFrame(const camera::CameraState *c, const MouseState *mouse, float deltaTime)
+void Im3dGui_NewFrame(const camera::CameraState *c, const MouseState *mouse, float deltaTime, float rayZValue)
 {
     auto &ad = Im3d::GetAppData();
 
@@ -34,7 +34,7 @@ void Im3dGui_NewFrame(const camera::CameraState *c, const MouseState *mouse, flo
         rayOrigin = ad.m_viewOrigin;
         rayDirection.x = cursorPos.x / c->projection[0];
         rayDirection.y = cursorPos.y / c->projection[5];
-        rayDirection.z = -1.0f;
+        rayDirection.z = rayZValue;
         auto camWorld = *(Im3d::Mat4*)&c->viewInverse;
         rayDirection = camWorld * Im3d::Vec4(Im3d::Normalize(rayDirection), 0.0f);
     }

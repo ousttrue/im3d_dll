@@ -60,7 +60,7 @@ int main(int, char **)
         camera.MouseInput(mouse);
         camera.state.CalcViewProjection();
 
-        Im3dGui_NewFrame(&camera.state, &mouse, 0);
+        Im3dGui_NewFrame(&camera.state, &mouse, 0, -1);
         #if 1
         Im3d::Gizmo("GizmoUnified", transform.data());
         #else
