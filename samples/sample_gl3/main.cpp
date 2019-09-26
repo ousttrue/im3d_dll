@@ -25,7 +25,7 @@ int main(int, char **)
 
     // Unified gizmo operates directly on a 4x4 matrix using the context-global gizmo modes.
     //static Im3d::Mat4 transform(1.0f);
-    static std::array<float, 16> transform = {
+    DirectX::XMFLOAT4X4 transform = {
         1,
         0,
         0,
@@ -54,13 +54,13 @@ int main(int, char **)
         camera.state.CalcViewProjection();
 
         Im3dGui_NewFrame(&camera.state, &mouse, 0, -1);
-        Im3d::Gizmo("GizmoUnified", transform.data());
+        Im3d::Gizmo("GizmoUnified", &transform._11);
         Im3d::EndFrame();
 
         GL3_NewFrame(w, h);
         {
-            GL3_DrawTeapot(camera.state.viewProjection.data(), transform.data());
-            Im3d_GL3_Draw(camera.state.viewProjection.data(), w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
+            GL3_DrawTeapot(&camera.state.viewProjection._11, &transform._11);
+            Im3d_GL3_Draw(&camera.state.viewProjection._11, w, h, Im3d::GetDrawLists(), Im3d::GetDrawListCount());
         }
         GL3_EndFrame();
     }

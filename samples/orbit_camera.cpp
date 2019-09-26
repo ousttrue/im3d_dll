@@ -4,106 +4,21 @@
 
 void OrbitCamera::CalcView()
 {
-    auto ys = (float)sin(yawRadians);
-    auto yc = (float)cos(yawRadians);
-    std::array<float, 16> yaw = {
-        yc,
-        0,
-        ys,
-        0,
+    auto yaw = DirectX::XMMatrixRotationY(yawRadians);
+    auto pitch = DirectX::XMMatrixRotationX(pitchRadians);
+    auto t = DirectX::XMMatrixTranslation(-shiftX, -shiftY, -shiftZ);
+    auto yawPitch = yaw * pitch;
+    DirectX::XMStoreFloat4x4(&state.view, yawPitch * t);
 
-        0,
-        1,
-        0,
-        0,
-
-        -ys,
-        0,
-        yc,
-        0,
-
-        0,
-        0,
-        0,
-        1,
-    };
-
-    auto ps = (float)sin(pitchRadians);
-    auto pc = (float)cos(pitchRadians);
-    std::array<float, 16> pitch = {
-        1,
-        0,
-        0,
-        0,
-
-        0,
-        pc,
-        ps,
-        0,
-
-        0,
-        -ps,
-        pc,
-        0,
-
-        0,
-        0,
-        0,
-        1,
-    };
-
-    std::array<float, 16> t = {
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        -shiftX,
-        -shiftY,
-        -shiftZ,
-        1,
-    };
-
-    auto yawPitch = camera::Mult(yaw, pitch);
-    state.view = camera::Mult(yawPitch, t);
-
-    t[12] *= -1;
-    t[13] *= -1;
-    t[14] *= -1;
-    camera::Transpose(yawPitch);
-    state.viewInverse = camera::Mult(t, yawPitch);
+    auto inv_t = DirectX::XMMatrixTranslation(shiftX, shiftY, shiftZ);
+    auto transposed = DirectX::XMMatrixTranspose(yawPitch);
+    DirectX::XMStoreFloat4x4(&state.viewInverse, inv_t * transposed);
 }
 
 void OrbitCamera::CalcPerspective()
 {
-    const float f = static_cast<float>(1.0f / tan(state.fovYRadians / 2.0));
-
-    state.projection[0] = f / aspectRatio;
-    state.projection[1] = 0.0f;
-    state.projection[2] = 0.0f;
-    state.projection[3] = 0.0f;
-
-    state.projection[4] = 0.0f;
-    state.projection[5] = f;
-    state.projection[6] = 0.0f;
-    state.projection[7] = 0.0f;
-
-    state.projection[8] = 0.0f;
-    state.projection[9] = 0.0f;
-    state.projection[10] = (zNear + zFar) / (zNear - zFar);
-    state.projection[11] = -1;
-
-    state.projection[12] = 0.0f;
-    state.projection[13] = 0.0f;
-    state.projection[14] = (2 * zFar * zNear) / (zNear - zFar);
-    state.projection[15] = 0.0f;
+    auto projection = DirectX::XMMatrixPerspectiveFovRH(state.fovYRadians, aspectRatio, zNear, zFar);
+    DirectX::XMStoreFloat4x4(&state.projection, projection);
 }
 
 void OrbitCamera::SetScreenSize(float w, float h)
@@ -135,7 +50,7 @@ void OrbitCamera::MouseInput(const MouseState &mouse)
         if (mouse.IsDown(ButtonFlags::Right))
         {
             const auto FACTOR = 1.0f / 180.0f * 1.7f;
-            yawRadians -= deltaX * FACTOR;
+            yawRadians += deltaX * FACTOR;
             pitchRadians += deltaY * FACTOR;
         }
         if (mouse.IsDown(ButtonFlags::Middle))

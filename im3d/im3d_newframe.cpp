@@ -17,8 +17,8 @@ void Im3dGui_NewFrame(const camera::CameraState *c, const MouseState *mouse, flo
     ad.m_viewportSize = Im3d::Vec2(c->viewportWidth, c->viewportHeight);
 
     auto &inv = c->viewInverse;
-    ad.m_viewOrigin = Im3d::Vec3(inv[12], inv[13], inv[14]); // for VR use the head position
-    ad.m_viewDirection = Im3d::Vec3(-inv[8], -inv[9], -inv[10]);
+    ad.m_viewOrigin = Im3d::Vec3(inv._41, inv._42, inv._43); // for VR use the head position
+    ad.m_viewDirection = Im3d::Vec3(-inv._31, -inv._32, -inv._33);
     ad.m_worldUp = Im3d::Vec3(0.0f, 1.0f, 0.0f); // used internally for generating orthonormal bases
     ad.m_projOrtho = false;
 
@@ -32,17 +32,17 @@ void Im3dGui_NewFrame(const camera::CameraState *c, const MouseState *mouse, flo
     Im3d::Vec3 rayOrigin, rayDirection;
     {
         rayOrigin = ad.m_viewOrigin;
-        rayDirection.x = cursorPos.x / c->projection[0];
-        rayDirection.y = cursorPos.y / c->projection[5];
+        rayDirection.x = cursorPos.x / c->projection._11;
+        rayDirection.y = cursorPos.y / c->projection._22;
         rayDirection.z = rayZValue;
-        auto camWorld = *(Im3d::Mat4*)&c->viewInverse;
+        auto camWorld = *(Im3d::Mat4 *)&c->viewInverse;
         rayDirection = camWorld * Im3d::Vec4(Im3d::Normalize(rayDirection), 0.0f);
     }
     ad.m_cursorRayOrigin = rayOrigin;
     ad.m_cursorRayDirection = rayDirection;
 
     // Set cull frustum planes. This is only required if IM3D_CULL_GIZMOS or IM3D_CULL_PRIMTIIVES is enable via im3d_config.h, or if any of the IsVisible() functions are called.
-    auto viewProj = *(Im3d::Mat4*)&c->viewProjection;
+    auto viewProj = *(Im3d::Mat4 *)&c->viewProjection;
     ad.setCullFrustum(viewProj, true);
 
     // Fill the key state array; using GetAsyncKeyState here but this could equally well be done via the window proc.
