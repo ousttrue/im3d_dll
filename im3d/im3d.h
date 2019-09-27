@@ -179,6 +179,8 @@ IM3D_EXPORT bool IsVisible(const Vec3 &_min, const Vec3 &_max); // axis-aligned 
 // Get/set the current context. All Im3d calls affect the currently bound context.
 IM3D_EXPORT Context &GetContext();
 IM3D_EXPORT void SetContext(Context &_ctx);
+IM3D_EXPORT Context *NewContext();
+IM3D_EXPORT void DestoryContext(Context *c);
 
 // Merge vertex data from _src into _dst_. Layers are preserved. Call before EndFrame().
 IM3D_EXPORT void MergeContexts(Context &_dst_, const Context &_src);

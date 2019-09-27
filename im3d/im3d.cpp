@@ -3189,6 +3189,14 @@ IM3D_EXPORT inline bool IsVisible(const Vec3 &_min, const Vec3 &_max) { return G
 
 IM3D_EXPORT inline Context &GetContext() { return *internal::g_CurrentContext; }
 IM3D_EXPORT inline void SetContext(Context &_ctx) { internal::g_CurrentContext = &_ctx; }
+IM3D_EXPORT Context *NewContext() { return new Context; }
+IM3D_EXPORT void DestoryContext(Context *c)
+{
+    if (c)
+    {
+        delete c;
+    }
+}
 
 IM3D_EXPORT inline void MergeContexts(Context &_dst_, const Context &_src) { _dst_.merge(_src); }
 } // namespace Im3d
