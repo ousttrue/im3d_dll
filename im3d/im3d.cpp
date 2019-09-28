@@ -3180,6 +3180,18 @@ IM3D_EXPORT inline Id GetLayerId() { return GetContext().getLayerId(); }
 
 IM3D_EXPORT inline bool GizmoTranslation(const char *_id, float _translation_[3], bool _local) { return GizmoTranslation(MakeId(_id), _translation_, _local); }
 IM3D_EXPORT inline bool GizmoRotation(const char *_id, float _rotation_[3 * 3], bool _local) { return GizmoRotation(MakeId(_id), _rotation_, _local); }
+IM3D_EXPORT inline bool GizmoRotation4x4(const char *_id, float _rotation_[4 * 4], bool _local)
+{
+    auto m = (Mat4 *)_rotation_;
+    auto r = m->getRotation();
+    if (!GizmoRotation(MakeId(_id), r, _local))
+    {
+        return false;
+    }
+    m->setRotation(r);
+    return true;
+}
+
 IM3D_EXPORT inline bool GizmoScale(const char *_id, float _scale_[3]) { return GizmoScale(MakeId(_id), _scale_); }
 IM3D_EXPORT inline bool Gizmo(const char *_id, float _translation_[3], float _rotation_[3 * 3], float _scale_[3]) { return Gizmo(MakeId(_id), _translation_, _rotation_, _scale_); }
 IM3D_EXPORT inline bool Gizmo(const char *_id, float _transform_[4 * 4]) { return Gizmo(MakeId(_id), _transform_); }

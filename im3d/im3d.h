@@ -160,6 +160,7 @@ IM3D_EXPORT Id GetLayerId();
 // push the local matrix before calling any of the following.
 IM3D_EXPORT bool GizmoTranslation(const char *_id, float _translation_[3], bool _local = false);
 IM3D_EXPORT bool GizmoRotation(const char *_id, float _rotation_[3 * 3], bool _local = false);
+IM3D_EXPORT bool GizmoRotation4x4(const char *_id, float _rotation_[4 * 4], bool _local = false);
 IM3D_EXPORT bool GizmoScale(const char *_id, float _scale_[3]); // local scale only
 // Unified gizmo, selects local/global, translation/rotation/scale based on the context-global gizmo modes. Return true if the gizmo is active.
 IM3D_EXPORT bool Gizmo(const char *_id, float _translation_[3], float _rotation_[3 * 3], float _scale_[3]); // any of _translation_/_rotation_/_scale_ may be null.
